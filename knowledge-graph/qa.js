@@ -335,12 +335,12 @@
     const nav = document.querySelector('.sidebar .nav');
     if (!nav) return;
     nav.setAttribute('aria-label', '主导航');
-    nav.insertAdjacentHTML('beforeend','<a class="nav-btn" href="knowledge-graph/index.html#tab=terms" title="术语库"><span class="nav-icon">▤</span><span>术语库</span></a>');
+    nav.insertAdjacentHTML('beforeend','<a class="nav-btn" href="knowledge-graph/index.html#tab=terms" title="同名术语库"><span class="nav-icon">▤</span><span>同名术语库</span></a>');
     const entries = [
       ['[data-view="home"]', '首页'],
       ['[data-view="records"]', '历史问答'],
       ['[data-view="knowledge"]', '知识库'],
-      ['[href="knowledge-graph/index.html#tab=terms"]', '术语库'],
+      ['[href="knowledge-graph/index.html#tab=terms"]', '同名术语库'],
       ['[href="knowledge-graph/index.html"]', '知识图谱'],
       ['[data-view="workflow"]', '工作流'],
       ['[data-view="assistant-chat"]', '智能体'],

@@ -19,8 +19,7 @@
   }
   function cardMarkup(item) {
     const tags = item.entities.slice(0,3).map(value => `<span class="entity-tag" title="${esc(value.name)}">${esc(value.name || '未命名实体')}</span>`).join('');
-    const toggle = item.live && item.stage !== 'reviewing' ? `<button class="link-btn" data-action="toggle">${item.live.enabled ? '禁用' : '启用'}</button>` : '';
-    return `<article class="ontology-card" data-id="${item.id}" role="link" tabindex="0" aria-label="查看 ${esc(item.name)} 的本体详情"><div class="card-main"><div class="card-heading"><span class="ontology-symbol"><svg class="icon"><use href="#graph-icon"/></svg></span><h2 class="card-title" title="${esc(item.name)}">${esc(item.name)}</h2>${statusMarkup(item)}</div><p class="card-desc" title="${esc(item.description || '暂无描述')}">${esc(item.description || '暂无描述')}</p><div class="card-stats"><span><strong>${item.entities.length}</strong>实体类型</span><span><strong>${item.relations.length}</strong>关系类型</span></div><div class="entity-tags">${tags}${item.entities.length > 3 ? '<span class="entity-tag">+' + (item.entities.length - 3) + '</span>' : ''}</div><div class="created">更新于 ${item.updated}</div><div class="card-availability ${item.live?.enabled ? 'available' : ''}">${esc(availability(item))}</div></div><footer class="card-footer"><button class="link-btn" data-action="edit">${item.stage === 'reviewing' ? '查看' : '编辑'}</button>${toggle}<button class="link-btn danger" data-action="delete">删除</button></footer></article>`;
+    return `<article class="ontology-card" data-id="${item.id}" role="link" tabindex="0" aria-label="查看 ${esc(item.name)} 的本体详情"><div class="card-main"><div class="card-heading"><span class="ontology-symbol"><svg class="icon"><use href="#graph-icon"/></svg></span><h2 class="card-title" title="${esc(item.name)}">${esc(item.name)}</h2>${statusMarkup(item)}</div><p class="card-desc" title="${esc(item.description || '暂无描述')}">${esc(item.description || '暂无描述')}</p><div class="card-stats"><span><strong>${item.entities.length}</strong>实体类型</span><span><strong>${item.relations.length}</strong>关系类型</span></div><div class="entity-tags">${tags}${item.entities.length > 3 ? '<span class="entity-tag">+' + (item.entities.length - 3) + '</span>' : ''}</div><div class="created">更新于 ${item.updated}</div><div class="card-availability ${item.live?.enabled ? 'available' : ''}">${esc(availability(item))}</div></div><footer class="card-footer"><button class="link-btn" data-action="detail">查看详情</button></footer></article>`;
   }
   function emptyMarkup() {
     const filtered = K.filter !== 'all' || K.keyword;
@@ -61,12 +60,16 @@
     $('submitReview').textContent = item.live ? '提交变更审核' : '提交发布审核';
     $('submitReview').title = dirty ? '请先保存草稿' : item.stage === 'published' ? '修改并保存草稿后可提交变更审核' : '';
     $('saveFirstHint').hidden = !dirty; $('availabilityText').textContent = availability(item);
+    const availabilityButton = $('toggleOntologyAvailability');
+    availabilityButton.textContent = item.live && !item.live.enabled ? '上线' : '下线';
+    availabilityButton.disabled = !item.live || locked;
+    availabilityButton.title = locked ? '审核中暂不可上下线' : !item.live ? '本体发布后才可下线' : '';
   }
   function renderModule() {
     const terms = K.pageTab === 'terms';
     $('graphPage').hidden = terms; $('terminologyPage').hidden = !terms;
-    document.querySelector('.topbar > span').textContent = terms ? '知识应用 / 术语库' : '知识应用 / 知识图谱';
-    document.querySelector('.sidebar-note').textContent = (terms ? '术语库' : '知识图谱') + ' · 产品原型';
+    document.querySelector('.topbar > span').textContent = terms ? '知识应用 / 同名术语库' : '知识应用 / 知识图谱';
+    document.querySelector('.sidebar-note').textContent = (terms ? '同名术语库' : '知识图谱') + ' · 产品原型';
     ['graphMenu','termsMenu'].forEach(id => {
       const active = id === 'termsMenu' ? terms : !terms;
       $(id).classList.toggle('active',active);
@@ -198,13 +201,25 @@
       return;
     }
     event.stopPropagation();
-    if (action.dataset.action === 'edit') { K.openOntology(item.id); return; }
-    if (action.dataset.action === 'toggle') {
-      const enabled = item.live.enabled;
-      K.confirm({title:enabled ? '禁用已发布版本？' : '启用已发布版本？',text:`将${enabled ? '禁用' : '恢复'}“${item.name}”已经审核通过的 v${item.live.version}。${enabled ? '禁用后不可用于新的图谱构建，已有配置会保留。' : '当前未发布草稿不会生效，仍需另行提交审核。'}`,label:enabled ? '禁用' : '启用',action:() => { K.toggle(item); K.extract.syncRecommendations(); K.refresh(); K.notify(enabled ? '已发布版本已禁用' : '已恢复审核通过的版本'); }});
-      return;
+    if (action.dataset.action === 'detail') K.openOntology(item.id);
+  }
+  function toggleAvailability() {
+    const item = K.item();
+    if (!item?.live || K.locked()) return;
+    const expected = {id:item.id,version:item.live.version,enabled:item.live.enabled,stage:item.stage};
+    K.confirm({title:expected.enabled ? '下线已发布本体？' : '上线已发布本体？',
+      text:`将${expected.enabled ? '下线' : '恢复'}“${item.name}”已经审核通过的 v${expected.version}。${expected.enabled ? '下线后不可用于新的图谱构建，已有配置会保留。' : '当前未发布草稿不会生效，仍需另行提交审核。'}`,
+      label:expected.enabled ? '下线' : '上线',danger:expected.enabled,action:() => applyAvailabilityChange(expected)});
+  }
+  function applyAvailabilityChange(expected) {
+    const item = K.item();
+    // 只切换当前已发布版本；不覆盖工作草稿，也不使用过期确认。
+    if (!item?.live || item.id !== expected.id || K.locked() || item.stage !== expected.stage ||
+        item.live.version !== expected.version || item.live.enabled !== expected.enabled) {
+      K.notify('本体状态已变化，请重新确认。'); K.refresh(); return;
     }
-    K.confirm({title:'删除本体？',text:`确定删除“${item.name}”吗？草稿、已发布配置和审核记录将一并移除，无法撤销。已有抽取任务保留创建时的本体记录。${item.stage === 'reviewing' ? '待审核申请也将被取消。' : ''}`,label:'删除',danger:true,action:() => { K.items = K.items.filter(value => value.id !== item.id); K.extract.syncRecommendations(); K.refresh(); K.notify('本体已删除'); }});
+    K.toggle(item); K.extract.syncRecommendations(); K.refresh();
+    K.notify(expected.enabled ? '本体已下线' : '本体已上线');
   }
   function listKeyAction(event) {
     // 仅处理卡片自身的键盘入口，卡片中的独立按钮沿用各自行为。
@@ -223,6 +238,7 @@
     document.querySelectorAll('[data-close-dialog]').forEach(element => element.addEventListener('click',() => $(element.dataset.closeDialog).close()));
   }
   function initNavigation() {
+    $('toggleOntologyAvailability').addEventListener('click',toggleAvailability);
     $('graphMenu').addEventListener('click',event => { event.preventDefault(); K.navigateTab('modeling'); });
     $('termsMenu').addEventListener('click',event => { event.preventDefault(); K.navigateTab('terms'); });
     $('moduleTabs').addEventListener('click',event => { const button = event.target.closest('[data-module-tab]'); if (button) K.navigateTab(button.dataset.moduleTab); });

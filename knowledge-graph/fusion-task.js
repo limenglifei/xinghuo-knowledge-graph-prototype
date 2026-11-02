@@ -21,7 +21,7 @@
     const problems = K.fusionUI.taskProblems(task.id), remaining = pending(task);
     const progress = remaining ? `<button type="button" class="link-btn fu-task-pending" data-fusion-task-pending="${esc(task.id)}" aria-label="${esc(task.name)}：待人工处理 ${remaining} 条，查看待处理问题">待人工处理 ${remaining} 条</button>` :
       problems.some(item => item.unavailable) ? '存在待核对记录' : '已处理完成';
-    return `<tr class="fu-task-row" data-fusion-task="${esc(task.id)}"><td><strong>${esc(task.name)}</strong><small>${esc(task.created)} · 自动处理 ≥${task.threshold}% · ${task.libraries.length ? '参考 '+task.libraries.length+' 个术语库' : '未设置参考术语库'}</small></td><td><button type="button" class="link-btn fu-problem-count" data-fusion-task-problems="${esc(task.id)}" aria-label="${esc(task.name)}的检测问题数：${problems.length}，查看问题清单">${problems.length}</button></td><td>${autoCount(task)} 条</td><td>${progress}</td></tr>`;
+    return `<tr class="fu-task-row" data-fusion-task="${esc(task.id)}"><td><strong>${esc(task.name)}</strong><small>${esc(task.created)} · 自动处理 ≥${task.threshold}% · ${task.libraries.length ? '参考 '+task.libraries.length+' 个同名术语库' : '未设置参考同名术语库'}</small></td><td><button type="button" class="link-btn fu-problem-count" data-fusion-task-problems="${esc(task.id)}" aria-label="${esc(task.name)}的检测问题数：${problems.length}，查看问题清单">${problems.length}</button></td><td>${autoCount(task)} 条</td><td>${progress}</td></tr>`;
   }
   /** 没有任务时解释当前进度，仍可直接查看尚未归入任务的问题。 */
   function renderEmpty(id) {
@@ -53,7 +53,7 @@
     $('fusionTaskOntology').disabled = Boolean(lockedOntologyId);
     $('fusionTaskScopeNote').hidden = !lockedOntologyId;
     defaultName(); $('fusionThreshold').value = 90; ranges(); $('fusionTaskError').hidden = true;
-    $('fusionTaskLibraries').innerHTML = K.terms.available().map(item => `<label><input type="checkbox" value="${esc(item.id)}" data-fusion-library><span>${esc(item.name)}</span><small>${item.terms.filter(term => term.enabled).length} 条已启用术语</small></label>`).join('') || '<p class="help">暂无可用术语库。可以先在左侧术语库中创建并启用术语，也可以不选术语库继续。</p>';
+    $('fusionTaskLibraries').innerHTML = K.terms.available().map(item => `<label><input type="checkbox" value="${esc(item.id)}" data-fusion-library><span>${esc(item.name)}</span><small>${item.terms.filter(term => term.enabled).length} 条已启用术语</small></label>`).join('') || '<p class="help">暂无可用同名术语库。可以先在左侧同名术语库中创建并启用术语，也可以不选同名术语库继续。</p>';
     $('fusionTaskDialog').showModal(); $('fusionTaskName').focus();
     return true;
   }
@@ -67,7 +67,7 @@
     if (!ontology) return {error:'请选择已发布且启用的本体。'};
     if (lockedOntologyId && ontology.id !== lockedOntologyId) return {error:'本任务仅用于当前图谱，请关闭后重新创建。'};
     if (!Number.isInteger(threshold) || threshold < 1 || threshold > 100) return {error:'置信度分界须为 1–100 的整数。'};
-    if (libraries.length !== ids.length) return {error:'所选术语库已禁用、删除或没有已启用术语，请重新选择。'};
+    if (libraries.length !== ids.length) return {error:'所选同名术语库已禁用、删除或没有已启用术语，请重新选择。'};
     return {ontology,name,threshold,libraries};
   }
   function setRunning(value) {
@@ -162,7 +162,7 @@
   function renderDetail(task) {
     $('fusionTaskDetailTitle').textContent = task.name;
     const refs = task.libraries.map(library => `<details class="fu-task-snapshot"><summary>${esc(library.name)} · ${library.terms.length} 条参考术语</summary><ul>${library.terms.map(term => `<li><strong>${esc(term.name)}</strong>${term.aliases.length ? '（'+esc(term.aliases.join('、'))+'）' : ''}：${esc(term.definition || '暂无释义')}</li>`).join('')}</ul></details>`).join('');
-    $('fusionTaskDetailBody').innerHTML = `<dl class="q-detail-facts"><dt>所属本体</dt><dd>${esc(task.ontologyName)} · v${task.ontologyVersion}</dd><dt>创建时间</dt><dd>${esc(task.created)}</dd><dt>高置信度</dt><dd>${task.threshold}%–100%，验证通过后 AI 自动处理</dd><dt>低置信度</dt><dd>0%–<${task.threshold}%，人工审核处理</dd></dl><h3>参考术语快照</h3>${refs || '<p class="help">本次未选择参考术语库，按本体与文档依据处理。</p>'}<p class="help">以下保留任务创建时的参考内容，后续编辑、禁用或删除术语不影响此记录。</p><h3>处理结果</h3>${task.results.map(result => {
+    $('fusionTaskDetailBody').innerHTML = `<dl class="q-detail-facts"><dt>所属本体</dt><dd>${esc(task.ontologyName)} · v${task.ontologyVersion}</dd><dt>创建时间</dt><dd>${esc(task.created)}</dd><dt>高置信度</dt><dd>${task.threshold}%–100%，验证通过后 AI 自动处理</dd><dt>低置信度</dt><dd>0%–<${task.threshold}%，人工审核处理</dd></dl><h3>参考术语快照</h3>${refs || '<p class="help">本次未选择参考同名术语库，按本体与文档依据处理。</p>'}<p class="help">以下保留任务创建时的参考内容，后续编辑、禁用或删除术语不影响此记录。</p><h3>处理结果</h3>${task.results.map(result => {
       const item = candidate(result.id), available = item?.taskId === task.id && item.ontologyId === task.ontologyId;
       const done = available && ['applied','approved','rejected'].includes(item.status);
       return `<article class="fu-task-outcome"><div><strong>${esc(result.title)}</strong><span>${result.confidence}%</span></div><p>${!available ? '原始记录暂不可用，请重新核对' : result.automatic ? 'AI 自动处理 · 已通过' : done ? '人工审核 · '+(item.status === 'rejected' ? '已驳回' : '已通过') : '待人工处理'} · ${esc(result.reason)}</p>${result.reference ? `<p>参考：${esc(result.reference.library)} / ${esc(result.reference.name)}</p>` : ''}${available ? `<button class="link-btn" data-task-candidate="${esc(result.id)}">${done ? '查看处理记录' : '审核处理'}</button>` : ''}</article>`;
@@ -191,7 +191,7 @@
   }
   function mountDialogs() {
     const dialog = document.createElement('dialog'); dialog.id = 'fusionTaskDialog'; dialog.className = 'fu-task-dialog'; dialog.setAttribute('aria-labelledby','fusionTaskTitle');
-    dialog.innerHTML = `<form class="dialog-layout" id="fusionTaskForm" novalidate><header class="dialog-header"><h2 id="fusionTaskTitle">新建融合任务</h2><button class="close" type="button" data-fusion-task-close aria-label="关闭新建融合任务">×</button></header><div class="dialog-body"><p class="form-error" id="fusionTaskError" role="alert" hidden></p><fieldset id="fusionTaskFields"><label class="fu-task-field">任务名称<input id="fusionTaskName" maxlength="50" required></label><label class="fu-task-field">选择本体<select id="fusionTaskOntology" required></select></label><div class="fu-task-field"><span>参考术语库 <small class="help">可多选，选填</small></span><div class="fu-task-libraries" id="fusionTaskLibraries"></div><small class="help">仅使用启用的术语库与术语，帮助识别标准名称和别名。</small></div><div class="fu-routing"><label>自动处理分界<input id="fusionThreshold" type="number" min="1" max="100" step="1" required aria-label="自动处理置信度分界">% </label><p id="fusionRouteSummary"></p><p>高置信度仍需通过类型、属性和来源检查；检查不通过或属性存在冲突时转人工审核。</p></div></fieldset></div><footer class="dialog-footer"><button class="btn" type="button" data-fusion-task-close>取消</button><button class="btn primary" type="submit" id="fusionTaskSubmit">创建并执行</button></footer></form>`;
+    dialog.innerHTML = `<form class="dialog-layout" id="fusionTaskForm" novalidate><header class="dialog-header"><h2 id="fusionTaskTitle">新建融合任务</h2><button class="close" type="button" data-fusion-task-close aria-label="关闭新建融合任务">×</button></header><div class="dialog-body"><p class="form-error" id="fusionTaskError" role="alert" hidden></p><fieldset id="fusionTaskFields"><label class="fu-task-field">任务名称<input id="fusionTaskName" maxlength="50" required></label><label class="fu-task-field">选择本体<select id="fusionTaskOntology" required></select></label><div class="fu-task-field"><span>参考同名术语库 <small class="help">可多选，选填</small></span><div class="fu-task-libraries" id="fusionTaskLibraries"></div><small class="help">仅使用启用的同名术语库与术语，帮助识别标准名称和别名。</small></div><div class="fu-routing"><label>自动处理分界<input id="fusionThreshold" type="number" min="1" max="100" step="1" required aria-label="自动处理置信度分界">% </label><p id="fusionRouteSummary"></p><p>高置信度仍需通过类型、属性和来源检查；检查不通过或属性存在冲突时转人工审核。</p></div></fieldset></div><footer class="dialog-footer"><button class="btn" type="button" data-fusion-task-close>取消</button><button class="btn primary" type="submit" id="fusionTaskSubmit">创建并执行</button></footer></form>`;
     document.body.append(dialog); $('fusionTaskForm').addEventListener('submit',submit);
     $('fusionTaskOntology').insertAdjacentHTML('afterend','<small class="help" id="fusionTaskScopeNote" hidden>当前任务仅处理此本体。如需处理其他本体，请返回融合列表创建。</small>');
     dialog.addEventListener('click',event => { if (event.target.closest('[data-fusion-task-close]') && !running) dialog.close(); });

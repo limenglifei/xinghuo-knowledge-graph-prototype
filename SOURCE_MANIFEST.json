@@ -1,5 +1,5 @@
 {
-  "source_commit": "1de22611df44322d7930c7287943650f85c8743a",
+  "source_commit": "1ddebb3a2064d80768bbd33d67afdcd7e34864c1",
   "kind": "static-product-prototype",
   "source_files": 48,
   "files": [
@@ -70,8 +70,8 @@
     },
     {
       "path": "knowledge-graph/fusion-task.js",
-      "bytes": 22165,
-      "sha": "097d1523650ccaa26abab9c2606d313bc09c28af"
+      "bytes": 22219,
+      "sha": "4c1a9e9103740eb8105cdf5fdbb75f1472373308"
     },
     {
       "path": "knowledge-graph/fusion.css",
@@ -80,8 +80,8 @@
     },
     {
       "path": "knowledge-graph/fusion.js",
-      "bytes": 46119,
-      "sha": "8f9d10d57a0b53da454056043517d329c427c859"
+      "bytes": 46125,
+      "sha": "7716977f9bd38be4fa9ad6acb095e0e366fdc111"
     },
     {
       "path": "knowledge-graph/graph-catalog.css",
@@ -100,8 +100,8 @@
     },
     {
       "path": "knowledge-graph/index.html",
-      "bytes": 40640,
-      "sha": "6139f928e67f3b3e6aecef02cb997e0dd5d18421"
+      "bytes": 40328,
+      "sha": "0b5fbe327be641472b43d9b5093a4f47e7c5e335"
     },
     {
       "path": "knowledge-graph/notification-center.css",
@@ -130,8 +130,8 @@
     },
     {
       "path": "knowledge-graph/ontology-app.js",
-      "bytes": 20590,
-      "sha": "8fcd827efc30d338481240a33aa832a954143309"
+      "bytes": 20916,
+      "sha": "e4b3532ef70b07473b9b564dbdf0ae66414725bd"
     },
     {
       "path": "knowledge-graph/ontology-editor.css",
@@ -180,8 +180,8 @@
     },
     {
       "path": "knowledge-graph/qa.js",
-      "bytes": 19827,
-      "sha": "8d02d9509c469151247f09b57d909543c267b608"
+      "bytes": 19845,
+      "sha": "6c09412fba9c52acfbc8d1b0737fdad3de9f3b64"
     },
     {
       "path": "knowledge-graph/quality-actions.js",
@@ -220,13 +220,13 @@
     },
     {
       "path": "knowledge-graph/terminology.css",
-      "bytes": 2455,
-      "sha": "b9d83bb846d018de39049b7673cdcd089267077d"
+      "bytes": 2461,
+      "sha": "054894cbdd2ee9357afc11fea4a93dad4d724b2d"
     },
     {
       "path": "knowledge-graph/terminology.js",
-      "bytes": 15287,
-      "sha": "9da9ef3e447f605798b24e8b32cff2b90d2d03e2"
+      "bytes": 15389,
+      "sha": "4da006bb166e5a9359e3b63697a1ceb9c206e60f"
     },
     {
       "path": "agent-v1.html",
@@ -240,8 +240,8 @@
     },
     {
       "path": "v122-ai-entry-architecture.html",
-      "bytes": 56913,
-      "sha": "50fc8fa0c774368c35f6da4a5980134ba63531a3"
+      "bytes": 56918,
+      "sha": "a2c473714cf9ece519bb2e6c9245e4535f06f7c3"
     },
     {
       "path": "index.html",

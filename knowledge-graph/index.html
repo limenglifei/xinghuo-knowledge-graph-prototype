@@ -120,7 +120,7 @@
   <link rel="stylesheet" href="results.css?v=36">
   <link rel="stylesheet" href="fusion.css?v=36">
   <link rel="stylesheet" href="quality.css?v=36">
-  <link rel="stylesheet" href="terminology.css?v=36">
+  <link rel="stylesheet" href="terminology.css?v=42">
   <link rel="stylesheet" href="fusion-task.css?v=36">
   <link rel="stylesheet" href="graph-catalog.css?v=40">
   <link rel="stylesheet" href="application.css?v=36">
@@ -139,7 +139,7 @@
         <a class="nav-item" href="../v122-ai-entry-architecture.html#home" title="首页"><svg class="icon" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7M5 9v12h14V9M9 21v-7h6v7"/></svg><span class="nav-label">首页</span></a>
         <a class="nav-item" href="../v122-ai-entry-architecture.html#records" title="历史问答"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5h16v12H8l-4 3zM8 9h8M8 13h5"/></svg><span class="nav-label">历史问答</span></a>
         <a class="nav-item" href="../v122-ai-entry-architecture.html#knowledge" title="知识库"><svg class="icon" viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg><span class="nav-label">知识库</span></a>
-        <a class="nav-item" id="termsMenu" href="#tab=terms" title="术语库"><svg class="icon" viewBox="0 0 24 24"><path d="M4 4h6a3 3 0 0 1 3 3v14a4 4 0 0 0-4-2H4zM13 7a3 3 0 0 1 3-3h5v15h-4a4 4 0 0 0-4 2M7 8h3M7 12h3M16 8h2M16 12h2"/></svg><span class="nav-label">术语库</span></a>
+        <a class="nav-item" id="termsMenu" href="#tab=terms" title="同名术语库"><svg class="icon" viewBox="0 0 24 24"><path d="M4 4h6a3 3 0 0 1 3 3v14a4 4 0 0 0-4-2H4zM13 7a3 3 0 0 1 3-3h5v15h-4a4 4 0 0 0-4 2M7 8h3M7 12h3M16 8h2M16 12h2"/></svg><span class="nav-label">同名术语库</span></a>
         <a class="nav-item active" id="graphMenu" href="#tab=modeling" aria-current="page" title="知识图谱"><svg class="icon"><use href="#graph-icon"/></svg><span class="nav-label">知识图谱</span></a>
         <a class="nav-item" href="../workflow-menu.html" title="工作流"><svg class="icon"><use href="#workflow-icon"/></svg><span class="nav-label">工作流</span></a>
         <a class="nav-item" href="../v122-ai-entry-architecture.html#assistant-chat" title="智能体"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="13" rx="3"/><path d="M12 3v4M2 12h2M20 12h2M8 16h8"/><circle cx="8" cy="11" r=".7"/><circle cx="16" cy="11" r=".7"/></svg><span class="nav-label">智能体</span></a>
@@ -183,7 +183,7 @@
         </section>
         <p class="preview-note">当前为示例演示，新增与修改仅在本次页面中生效，刷新后恢复初始内容。</p>
       </div>
-      <section class="content" id="terminologyPage" aria-label="术语库" hidden></section>
+      <section class="content" id="terminologyPage" aria-label="同名术语库" hidden></section>
     </main>
   </div>
   <section class="builder" id="editorView" hidden aria-label="本体编辑详情">
@@ -191,7 +191,7 @@
       <button class="btn back-btn" id="backToList" aria-label="返回本体列表">←</button>
       <div class="builder-title"><h1 id="builderName">本体编辑</h1><span id="builderStatus" class="status"></span></div>
       <span class="save-indicator" id="saveIndicator">草稿已保存</span>
-      <div class="builder-header-actions"><button class="btn" id="showHistory">审核历史</button><button type="button" class="kg-message-trigger" data-kg-notifications aria-label="消息中心"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4M12 2V1"/></svg></button><span class="preview-badge">原型预览</span></div>
+      <div class="builder-header-actions"><button class="btn" id="showHistory">审核历史</button><button class="btn" id="toggleOntologyAvailability" type="button">下线</button></div>
     </header>
     <div id="workflowNotice" class="workflow-notice" role="status"></div>
     <div class="builder-workspace">
@@ -233,7 +233,7 @@
       <div class="dialog-body"><p class="form-error" id="editorError" role="alert" hidden></p>
         <div class="basic-field"><label for="ontologyName"><span class="required">*</span>本体名称</label><input id="ontologyName" maxlength="50" placeholder="例如：生物医药" required><span class="help" id="nameLength">0 / 50</span></div>
         <div class="basic-field"><label for="ontologyDesc">描述</label><textarea id="ontologyDesc" rows="3" maxlength="200" placeholder="描述知识领域、用途，以及关注的对象和关联"></textarea><span class="help" id="descLength">0 / 200</span></div>
-        <label class="ai-create-option" id="aiCreateOption"><input type="checkbox" id="createWithAI"><span>创建后使用 AI 辅助构建<small>根据名称和描述提供结构建议，确认后加入草稿。</small></span></label>
+        <label class="ai-create-option" id="aiCreateOption"><input type="checkbox" id="createWithAI"><span>使用AI辅助构建<small>根据名称和描述提供结构建议，确认后加入草稿。</small></span></label>
         <p class="notice muted-notice" id="createNotice">创建后为草稿。请在编辑页完善实体与关系，保存并提交审核，通过后方可使用。</p>
       </div>
       <footer class="dialog-footer"><button class="btn" type="button" id="cancelEditor">取消</button><button class="btn primary" type="submit" id="saveOntology">创建草稿</button></footer>
@@ -277,7 +277,7 @@
   <script src="ontology-state.js?v=36"></script>
   <script src="extraction-state.js?v=36"></script>
   <script src="results-state.js?v=36"></script>
-  <script src="terminology.js?v=36"></script>
+  <script src="terminology.js?v=42"></script>
   <script src="graph-preview.js?v=36"></script>
   <script src="ontology-editor.js?v=36"></script>
   <script src="ontology-ai.js?v=36"></script>
@@ -285,8 +285,8 @@
   <script src="extraction-wizard.js?v=36"></script>
   <script src="extraction-ui.js?v=39"></script>
   <script src="results-ui.js?v=36"></script>
-  <script src="fusion.js?v=39"></script>
-  <script src="fusion-task.js?v=39"></script>
+  <script src="fusion.js?v=42"></script>
+  <script src="fusion-task.js?v=42"></script>
   <script src="quality.js?v=39"></script>
   <script src="quality-actions.js?v=36"></script>
   <script src="graph-catalog.js?v=40"></script>
@@ -296,7 +296,7 @@
   <script src="application-state.js?v=41"></script>
   <script src="application-explorer.js?v=36"></script>
   <script src="application-ui.js?v=36"></script>
-  <script src="ontology-app.js?v=36"></script>
+  <script src="ontology-app.js?v=42"></script>
   <script src="notification-data.js?v=41"></script>
   <script src="notification-target.js?v=36"></script>
   <script src="notification-center.js?v=36"></script>
