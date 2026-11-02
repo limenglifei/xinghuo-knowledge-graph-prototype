@@ -479,7 +479,7 @@
         const ids = [primary.id,entity.id];
         let candidate = candidates.find(item => item.ontologyId === ontologyId && item.category === 'alignment' && pairKey(item.entityIds) === pairKey(ids));
         if (!candidate) {
-          candidate = {id:K.uid('fusion-terms'),ontologyId,category:'alignment',entityIds:ids,title:primary.name + ' ↔ ' + entity.name,reason:'同名术语库将上述表达归为同一标准术语，请结合文档依据确认。',confidence:95,status:'pending'};
+          candidate = {id:K.uid('fusion-terms'),ontologyId,category:'alignment',entityIds:ids,title:primary.name + ' ↔ ' + entity.name,reason:'术语库将上述表达归为同一标准术语，请结合文档依据确认。',confidence:95,status:'pending'};
           candidates.push(candidate);
         }
         if (!candidate.taskId && candidate.status === 'pending') candidate.termReference = {name:term.name,library:term.libraryName,definition:term.definition};

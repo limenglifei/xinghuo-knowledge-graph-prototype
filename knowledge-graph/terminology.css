@@ -1,4 +1,4 @@
-/* 同名术语库沿用知识库卡片与表单密度，所有扩展仅限当前页面。 */
+/* 术语库沿用知识库卡片与表单密度，所有扩展仅限当前页面。 */
 #termsSearch { width:300px; }
 #termsStatus { width:130px; }
 .term-card .card-footer { gap:13px; flex-wrap:wrap; }

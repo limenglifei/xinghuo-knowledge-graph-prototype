@@ -68,8 +68,8 @@
   function renderModule() {
     const terms = K.pageTab === 'terms';
     $('graphPage').hidden = terms; $('terminologyPage').hidden = !terms;
-    document.querySelector('.topbar > span').textContent = terms ? '知识应用 / 同名术语库' : '知识应用 / 知识图谱';
-    document.querySelector('.sidebar-note').textContent = (terms ? '同名术语库' : '知识图谱') + ' · 产品原型';
+    document.querySelector('.topbar > span').textContent = terms ? '知识应用 / 术语库' : '知识应用 / 知识图谱';
+    document.querySelector('.sidebar-note').textContent = (terms ? '术语库' : '知识图谱') + ' · 产品原型';
     ['graphMenu','termsMenu'].forEach(id => {
       const active = id === 'termsMenu' ? terms : !terms;
       $(id).classList.toggle('active',active);
