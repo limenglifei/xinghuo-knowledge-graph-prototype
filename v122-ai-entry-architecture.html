@@ -1,0 +1,1968 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>星火知识库 - 智能问答</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="knowledge-graph/qa.css">
+  <link rel="stylesheet" href="knowledge-graph/qa-evidence.css">
+  <link rel="stylesheet" href="knowledge-graph/notification-center.css?v=36">
+  <style>
+    :root {
+      --blue: #3f6fff;
+      --blue-soft: #edf3ff;
+      --ink: #1f2430;
+      --text: #323847;
+      --muted: #7f8a9d;
+      --line: #e5e9f2;
+      --panel: #ffffff;
+      --bg: #f6f8fc;
+      --green: #17a56b;
+      --green-soft: #eaf8f2;
+      --amber: #d9822b;
+      --amber-soft: #fff7e8;
+      --red: #d64545;
+      --red-soft: #fff0f0;
+      --purple: #6554c0;
+      --purple-soft: #f0efff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      background: #fff;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button { cursor: pointer; }
+
+    .app {
+      display: grid;
+      grid-template-columns: 216px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px 12px;
+      border-right: 1px solid var(--line);
+      background: #f7f8fc;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 36px;
+      padding: 0 14px;
+      color: var(--ink);
+      font-size: 20px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+      background:
+        linear-gradient(135deg, #23c1ff 0 38%, transparent 38%),
+        linear-gradient(225deg, #3f6fff 0 45%, transparent 45%),
+        linear-gradient(315deg, #5bd592 0 48%, transparent 48%),
+        #eaf2ff;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      height: 42px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #303744;
+      background: transparent;
+      text-align: left;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .nav-btn:hover {
+      background: #fff;
+      border-color: var(--line);
+    }
+
+    .nav-btn.active {
+      color: var(--blue);
+      background: #fff;
+      border-color: #e9edf7;
+      box-shadow: 0 4px 14px rgba(32, 52, 92, 0.04);
+    }
+
+    .nav-icon {
+      width: 18px;
+      height: 18px;
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+
+    .main {
+      min-width: 0;
+      min-height: 100vh;
+      padding: 12px 18px;
+      overflow: auto;
+    }
+
+    .topbar {
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .search {
+      width: 220px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      color: #9aa4b5;
+      background: #fff;
+      font-size: 13px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: #6b7485;
+      font-size: 13px;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--blue);
+      font-weight: 800;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .page-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 18px;
+    }
+
+    .page-head h1 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 24px;
+      line-height: 1.25;
+      font-weight: 850;
+    }
+
+    .page-head p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .btn {
+      height: 34px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: #3b465a;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .btn.primary {
+      border-color: var(--blue);
+      color: #fff;
+      background: var(--blue);
+    }
+
+    .btn.text {
+      border-color: transparent;
+      color: var(--blue);
+      background: transparent;
+      padding: 0 4px;
+    }
+
+    .tag {
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #eef2f8;
+      color: #586377;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tag.blue { color: var(--blue); background: var(--blue-soft); }
+    .tag.green { color: var(--green); background: var(--green-soft); }
+    .tag.amber { color: var(--amber); background: var(--amber-soft); }
+    .tag.red { color: var(--red); background: var(--red-soft); }
+    .tag.purple { color: var(--purple); background: var(--purple-soft); }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 10px 28px rgba(31, 36, 48, 0.04);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 8px;
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 850;
+    }
+
+    .home-grid {
+      display: grid;
+      grid-template-columns: minmax(960px, 1280px);
+      justify-content: center;
+      gap: 8px;
+      align-items: start;
+    }
+
+    #home {
+      min-height: calc(100vh - 72px);
+      padding: clamp(28px, 7vh, 72px) 0 32px;
+    }
+
+    #home.view.active {
+      display: grid;
+      place-items: start center;
+    }
+
+    #home .home-grid {
+      width: min(100%, 1280px);
+    }
+
+    .home-heading {
+      text-align: center;
+      margin-bottom: 0;
+    }
+
+    .home-heading h1 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 28px;
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .home-heading .headline-accent {
+      color: var(--blue);
+    }
+
+    .home-heading p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .home-panel {
+      padding: clamp(6px, 0.8vw, 10px);
+    }
+
+    .ask-panel {
+      padding: clamp(6px, 0.8vw, 10px);
+    }
+
+    .home-panel.ask-panel {
+      border-color: transparent;
+      box-shadow: none;
+      padding: 0;
+    }
+
+    .mode-tabs {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      margin-bottom: 16px;
+      border-radius: 9px;
+      background: #f1f4fa;
+    }
+
+    .mode-tab {
+      height: 32px;
+      padding: 0 14px;
+      border: 0;
+      border-radius: 7px;
+      color: #5d687a;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .mode-tab.active {
+      color: var(--blue);
+      background: #fff;
+      box-shadow: 0 4px 10px rgba(31, 36, 48, 0.06);
+    }
+
+    .ask-area {
+      border: 2px solid var(--blue);
+      border-radius: 10px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .textarea {
+      width: 100%;
+      min-height: 48px;
+      border: 0;
+      resize: none;
+      outline: none;
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .ask-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-top: 1px solid #eef1f6;
+      background: #fbfcff;
+    }
+
+    .select-pill {
+      height: 30px;
+      padding: 0 10px;
+      border: 1px solid #dde3ef;
+      border-radius: 7px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #465065;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .send {
+      margin-left: auto;
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 8px;
+      color: #fff;
+      background: var(--blue);
+      font-weight: 900;
+    }
+
+    .workflow-config {
+      display: none;
+      border: 1px solid #dde3ef;
+      border-radius: 8px;
+      margin: 12px 0 0;
+      padding: 14px;
+      background: #fbfcff;
+    }
+
+    .workflow-config.active { display: block; }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 128px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .field-row:last-child { margin-bottom: 0; }
+
+    .field-row label {
+      color: #5d687a;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .input,
+    .select {
+      width: 100%;
+      height: 36px;
+      border: 1px solid #dce2ec;
+      border-radius: 8px;
+      padding: 0 11px;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      font-size: 13px;
+    }
+
+    .note-box {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: #5d687a;
+      background: #f6f8fc;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .assistant-strip {
+      padding: 0;
+      border: 0;
+      box-shadow: none;
+      background: transparent;
+    }
+
+    .assistant-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .assistant-list.home-assistants {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    #home .note-box {
+      display: none;
+    }
+
+    .assistant-card {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      background: #fff;
+      text-align: left;
+    }
+
+    .assistant-list.home-assistants .assistant-card {
+      position: relative;
+      min-height: 188px;
+      padding: clamp(12px, 1.2vw, 18px) clamp(10px, 1vw, 16px) 16px;
+      border-color: #e9edf7;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      align-items: start;
+      justify-items: center;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .assistant-list.home-assistants .assistant-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(31, 36, 48, 0.06);
+    }
+
+    .assistant-list.home-assistants .assistant-card::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: var(--blue);
+    }
+
+    .assistant-list.home-assistants .assistant-card.green::after {
+      background: var(--green);
+    }
+
+    .assistant-list.home-assistants .assistant-card.purple::after {
+      background: var(--purple);
+    }
+
+    .assistant-list.home-assistants .assistant-card.amber::after {
+      background: var(--amber);
+    }
+
+    .assistant-list.home-assistants .assistant-card.red::after {
+      background: var(--red);
+    }
+
+    .assistant-list.home-assistants .assistant-icon {
+      width: 68px;
+      height: 68px;
+      border-radius: 999px;
+      border: 8px solid #eef5ff;
+      font-size: 18px;
+    }
+
+    .assistant-list.home-assistants .assistant-icon.green {
+      border-color: #e9fbf1;
+    }
+
+    .assistant-list.home-assistants .assistant-icon.purple {
+      border-color: #f5ecff;
+    }
+
+    .assistant-list.home-assistants .assistant-icon.amber {
+      border-color: #fff7df;
+    }
+
+    .assistant-list.home-assistants .assistant-icon.red {
+      border-color: #ffedf0;
+    }
+
+    .assistant-list.home-assistants .card-title {
+      font-size: 15px;
+    }
+
+    .assistant-list.home-assistants .card-sub {
+      margin-top: 4px;
+      min-height: 0;
+      line-height: 1.5;
+    }
+
+    .assistant-action {
+      width: 100%;
+      height: 34px;
+      margin-top: 2px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--blue);
+      background: var(--blue-soft);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .assistant-card.green .assistant-action {
+      color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .assistant-card.purple .assistant-action {
+      color: var(--purple);
+      background: var(--purple-soft);
+    }
+
+    .assistant-card.amber .assistant-action {
+      color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .assistant-card.red .assistant-action {
+      color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .home-row {
+      display: block;
+    }
+
+    .entry-mode-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .entry-mode-card {
+      min-height: 72px;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: grid;
+      grid-template-columns: 40px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      background: #fff;
+      text-align: left;
+    }
+
+    .entry-mode-card:hover {
+      border-color: #cfd8eb;
+      background: #fbfcff;
+    }
+
+    .entry-mode-card:hover .assistant-icon.purple {
+      background: #f0e8ff;
+    }
+
+    .entry-mode-card:hover .assistant-icon:not(.purple) {
+      background: #eaf1ff;
+    }
+
+    .entry-mode-card:hover .entry-mode-arrow {
+      color: var(--blue);
+    }
+
+    .entry-mode-arrow {
+      color: #a1abc0;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .workflow-showcase {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .workflow-preview {
+      min-height: 232px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .workflow-preview-title {
+      margin: 0 0 8px;
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 850;
+    }
+
+    .workflow-canvas {
+      position: relative;
+      height: 176px;
+      border: 1px solid #e8edf6;
+      border-radius: 8px;
+      overflow: hidden;
+      background-image: radial-gradient(#cfdaec 1px, transparent 1px);
+      background-size: 18px 18px;
+      background-color: #fff;
+    }
+
+    .flow-node {
+      position: absolute;
+      width: 138px;
+      min-height: 76px;
+      padding: 14px;
+      border: 1px solid #d8e2f4;
+      border-radius: 8px;
+      display: grid;
+      grid-template-columns: 32px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      background: #fff;
+      box-shadow: 0 8px 18px rgba(31, 36, 48, 0.05);
+    }
+
+    .flow-node.form-node {
+      left: 12px;
+      top: 30px;
+      border-color: #bdf0d8;
+    }
+
+    .flow-node.retrieve-node {
+      left: calc(50% - 69px);
+      top: 30px;
+      border-color: #cfe0ff;
+    }
+
+    .flow-node.agent {
+      right: 12px;
+      top: 30px;
+      border-color: #eadbff;
+    }
+
+    .flow-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: var(--blue);
+      background: var(--blue-soft);
+      font-weight: 900;
+    }
+
+    .flow-node.form-node .flow-icon {
+      color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .flow-node.agent .flow-icon {
+      color: var(--purple);
+      background: var(--purple-soft);
+    }
+
+    .flow-title {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .flow-desc {
+      grid-column: 2;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .flow-arrow {
+      position: absolute;
+      top: 68px;
+      height: 1px;
+      background: #d5deed;
+    }
+
+    .flow-arrow::after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: -4px;
+      width: 8px;
+      height: 8px;
+      border-top: 1px solid #c8d2e3;
+      border-right: 1px solid #c8d2e3;
+      transform: rotate(45deg);
+      background: transparent;
+    }
+
+    .flow-arrow.left {
+      left: 166px;
+      right: calc(50% + 86px);
+    }
+
+    .flow-arrow.right {
+      left: calc(50% + 86px);
+      right: 166px;
+    }
+
+    .flow-chip {
+      position: absolute;
+      min-width: 64px;
+      height: 24px;
+      padding: 0 10px;
+      border: 1px solid #dfe6f2;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: var(--blue);
+      background: #f7faff;
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .flow-chip.config {
+      left: 48px;
+      bottom: 28px;
+      color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .flow-chip.rag {
+      left: calc(50% - 32px);
+      bottom: 28px;
+    }
+
+    .flow-chip.prompt {
+      right: 48px;
+      bottom: 28px;
+      color: var(--purple);
+      background: var(--purple-soft);
+    }
+
+    .workflow-cta {
+      position: relative;
+      min-height: 232px;
+      padding: 18px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      overflow: hidden;
+      color: #fff;
+      background: #2f68e8;
+      box-shadow: 0 14px 30px rgba(47, 104, 232, 0.18);
+    }
+
+    .workflow-cta::after {
+      content: "◇";
+      position: absolute;
+      right: -8px;
+      bottom: -36px;
+      color: rgba(255, 255, 255, 0.13);
+      font-size: 128px;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .workflow-cta h3 {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.35;
+      font-weight: 900;
+    }
+
+    .workflow-cta p {
+      position: relative;
+      z-index: 1;
+      margin: 8px 0 18px;
+      color: rgba(255, 255, 255, 0.84);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .workflow-cta .btn {
+      position: relative;
+      z-index: 1;
+      height: 40px;
+      padding: 0 18px;
+      border-color: transparent;
+      color: var(--blue);
+      background: #fff;
+      box-shadow: 0 8px 16px rgba(18, 45, 110, 0.18);
+    }
+
+    .compact-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .compact-item {
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      background: #fff;
+    }
+
+    .compact-name {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .compact-desc {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .assistant-card:hover {
+      border-color: #cfd8eb;
+      background: #fbfcff;
+    }
+
+    .assistant-card.disabled {
+      opacity: 0.64;
+      cursor: not-allowed;
+    }
+
+    .assistant-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: var(--blue);
+      background: var(--blue-soft);
+      font-weight: 900;
+    }
+
+    .assistant-icon.green {
+      color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .assistant-icon.amber {
+      color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .assistant-icon.red {
+      color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .assistant-icon.purple {
+      color: var(--purple);
+      background: var(--purple-soft);
+    }
+
+    .card-title {
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .card-sub {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .logic-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .logic-card {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .logic-card b {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .logic-card span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .home-section {
+      margin-top: 18px;
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .quick-item {
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      background: #fff;
+      text-align: left;
+    }
+
+    .quick-item:hover {
+      border-color: #cfd8eb;
+      background: #fbfcff;
+    }
+
+    .quick-name {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .quick-desc {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .assistant-page-grid {
+      display: grid;
+      grid-template-columns: 290px minmax(0, 1fr);
+      gap: 18px;
+      min-height: calc(100vh - 136px);
+    }
+
+    .assistant-sidebar {
+      padding: 16px;
+      align-self: start;
+    }
+
+    .info-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .info-item {
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eef1f6;
+    }
+
+    .info-item:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .info-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .info-value {
+      margin-top: 5px;
+      color: #3b465a;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .chat-panel {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      min-height: calc(100vh - 136px);
+      overflow: hidden;
+    }
+
+    .chat-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .chat-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .chat-title h2 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 17px;
+    }
+
+    .chat-body {
+      min-height: 0;
+      padding: 18px;
+      overflow: auto;
+      background: #fbfcff;
+    }
+
+    .message {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .message.user {
+      justify-content: flex-end;
+    }
+
+    .bubble {
+      max-width: 72%;
+      padding: 12px 14px;
+      border-radius: 8px;
+      color: #344054;
+      background: #fff;
+      border: 1px solid #eef1f6;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .message.user .bubble {
+      color: #fff;
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .refs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .chat-input {
+      border-top: 1px solid var(--line);
+      padding: 12px;
+      background: #fff;
+    }
+
+    .record-layout {
+      display: grid;
+      grid-template-columns: 360px minmax(560px, 1fr);
+      gap: 18px;
+    }
+
+    .record-master {
+      padding: 14px;
+      align-self: start;
+      display: grid;
+      gap: 12px;
+    }
+
+    .filter-panel {
+      padding: 0;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      height: 30px;
+      padding: 0 10px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #4d586b;
+      background: #f4f6fb;
+      font-size: 12px;
+      font-weight: 750;
+      text-align: left;
+    }
+
+    .filter-btn.active {
+      color: var(--blue);
+      border-color: #dce6ff;
+      background: var(--blue-soft);
+    }
+
+    .record-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .record-detail {
+      padding: 20px;
+      align-self: start;
+      position: sticky;
+      top: 16px;
+    }
+
+    .detail-title {
+      margin: 0 0 6px;
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 850;
+      line-height: 1.35;
+    }
+
+    .detail-summary {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .detail-answer {
+      padding: 12px;
+      border: 1px solid #edf1f7;
+      border-radius: 8px;
+      color: #475467;
+      background: #fbfcff;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .detail-block {
+      padding: 12px 0;
+      border-top: 1px solid #eef1f6;
+    }
+
+    .detail-block h3 {
+      margin: 0 0 10px;
+      color: #344054;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .quote-card {
+      padding: 10px;
+      border: 1px solid #edf1f7;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: #fbfcff;
+    }
+
+    .quote-card:last-child { margin-bottom: 0; }
+
+    .quote-name {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .quote-text {
+      margin-top: 6px;
+      color: #667085;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .record-item {
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: block;
+      background: #fff;
+    }
+
+    .record-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 7px;
+    }
+
+    .record-title {
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 850;
+      line-height: 1.45;
+    }
+
+    .record-desc {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .record-action {
+      margin-top: 10px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .qa-thread {
+      display: grid;
+      gap: 12px;
+    }
+
+    .thread-row {
+      display: grid;
+      gap: 6px;
+    }
+
+    .thread-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .thread-box {
+      padding: 12px;
+      border: 1px solid #edf1f7;
+      border-radius: 8px;
+      color: #475467;
+      background: #fbfcff;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .thread-box.answer {
+      background: #fff;
+    }
+
+    .admin-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      gap: 18px;
+    }
+
+    .admin-panel {
+      padding: 18px;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .table th,
+    .table td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #eef1f6;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .table th {
+      color: #667085;
+      background: #fafbfe;
+      font-weight: 800;
+    }
+
+    .table td {
+      color: #344054;
+    }
+
+    .flow {
+      display: grid;
+      gap: 10px;
+    }
+
+    .flow-step {
+      position: relative;
+      padding: 12px 12px 12px 36px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .flow-step::before {
+      content: attr(data-step);
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--blue);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .flow-step b {
+      display: block;
+      color: var(--ink);
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .flow-step span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1100px) {
+      .app { grid-template-columns: 72px minmax(0, 1fr); }
+      .brand span,
+      .nav-btn span:last-child { display: none; }
+      .nav-btn { justify-content: center; padding: 0; }
+      .home-grid,
+      .assistant-page-grid,
+      .record-layout,
+      .admin-grid,
+      .logic-grid,
+      .home-row,
+      .workflow-showcase {
+        grid-template-columns: 1fr;
+      }
+
+      #home .home-grid {
+        width: 100%;
+      }
+
+      .assistant-list.home-assistants {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .main { padding: 14px; }
+      .entry-mode-grid {
+        grid-template-columns: 1fr;
+      }
+      .assistant-list.home-assistants {
+        grid-template-columns: 1fr;
+      }
+      .workflow-preview { padding: 12px; }
+      .workflow-canvas {
+        height: 344px;
+      }
+      .flow-node {
+        left: calc(50% - 69px) !important;
+        right: auto !important;
+      }
+      .flow-node.form-node { top: 18px; }
+      .flow-node.retrieve-node { top: 130px; }
+      .flow-node.agent { top: 242px; }
+      .flow-arrow { display: none; }
+      .flow-chip.config {
+        left: calc(50% - 32px);
+        top: 100px;
+        bottom: auto;
+      }
+      .flow-chip.rag {
+        top: 212px;
+        bottom: auto;
+      }
+      .flow-chip.prompt {
+        right: auto;
+        left: calc(50% - 32px);
+        bottom: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <span>星火知识库</span>
+      </div>
+      <nav class="nav" aria-label="原型导航">
+        <button class="nav-btn active" data-view="home"><span class="nav-icon">⌂</span><span>首页问答</span></button>
+        <button class="nav-btn" data-view="knowledge"><span class="nav-icon">▣</span><span>知识库</span></button>
+        <a class="nav-btn" href="knowledge-graph/index.html"><span class="nav-icon">⬡</span><span>知识图谱</span></a>
+        <button class="nav-btn" data-view="workflow"><span class="nav-icon">◇</span><span>工作流</span></button>
+        <button class="nav-btn" data-view="assistants"><span class="nav-icon">✦</span><span>场景助手</span></button>
+        <button class="nav-btn" data-view="assistant-chat"><span class="nav-icon">☷</span><span>助手问答页</span></button>
+        <button class="nav-btn" data-view="records"><span class="nav-icon">◷</span><span>我的记录</span></button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="search">⌕ 搜索知识库 / 文件 / 记录</div>
+        <div class="top-actions">
+          <span>帮助</span>
+          <button type="button" class="kg-message-trigger" data-kg-notifications aria-label="消息中心"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4M12 2V1"/></svg></button>
+          <div class="avatar">张</div>
+        </div>
+      </header>
+
+      <section class="view active" id="home">
+        <div class="home-grid">
+          <div class="home-heading">
+            <h1>星火知识库 · <span class="headline-accent">构建 AI 工作流与 Agent</span></h1>
+          </div>
+
+          <div class="panel ask-panel home-panel">
+            <div class="ask-mode-panel" id="knowledge-mode">
+              <div class="ask-area">
+                <textarea id="qaHomeQuestion" class="textarea" maxlength="2000" aria-label="输入问题" placeholder="输入问题，例如：阿莫西林胶囊属于哪个类型？"></textarea>
+                <div class="ask-toolbar">
+                  <button class="select-pill">Spark 4.0 Ultra</button>
+                  <button class="select-pill" data-qa-sources="kb">知识源：2 个知识库</button>
+                  <button class="select-pill qa-graph-trigger" data-qa-sources="graphs">⬡ 知识图谱：未选择</button>
+                  <button id="qaHomeSend" class="send" aria-label="发送问题">↑</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="qa-home-examples"><span>图谱问答试一试</span><button data-qa-example="阿莫西林胶囊属于哪个类型？">阿莫西林胶囊属于哪个类型？ ↗</button><span id="qaHomeError" role="alert"></span></div>
+
+          <div class="entry-mode-grid">
+            <button class="entry-mode-card" data-view-link="workflow">
+              <div class="assistant-icon purple">流</div>
+              <div>
+                <div class="card-title">使用工作流问答</div>
+                <div class="card-sub">选择已发布流程，按固定步骤处理问题</div>
+              </div>
+              <span class="entry-mode-arrow">›</span>
+            </button>
+            <button class="entry-mode-card" data-view-link="assistant-chat">
+              <div class="assistant-icon">智</div>
+              <div>
+                <div class="card-title">使用智能体问答</div>
+                <div class="card-sub">选择智能体，结合工具和知识完成任务</div>
+              </div>
+              <span class="entry-mode-arrow">›</span>
+            </button>
+          </div>
+
+          <div class="home-row">
+            <section class="panel home-panel">
+              <div class="section-title">
+                <span>常用场景助手</span>
+                <button class="btn text" data-view-link="assistants">全部</button>
+              </div>
+              <div class="assistant-list home-assistants">
+                <button class="assistant-card" data-view-link="assistant-chat">
+                  <div class="assistant-icon">人</div>
+                  <div>
+                    <div class="card-title">行政人事助手</div>
+                    <div class="card-sub">处理请假审批、员工福利咨询及人事政策解答</div>
+                  </div>
+                  <span class="assistant-action">开始对话</span>
+                </button>
+                <button class="assistant-card green" data-view-link="assistant-chat">
+                  <div class="assistant-icon green">IT</div>
+                  <div>
+                    <div class="card-title">IT 技术支持</div>
+                    <div class="card-sub">解决办公软件安装、账号权限申请及网络故障申报</div>
+                  </div>
+                  <span class="assistant-action">开始对话</span>
+                </button>
+                <button class="assistant-card purple" data-view-link="assistant-chat">
+                  <div class="assistant-icon purple">财</div>
+                  <div>
+                    <div class="card-title">财务报销顾问</div>
+                    <div class="card-sub">报销标准查询、发票真伪核验及费用分类建议</div>
+                  </div>
+                  <span class="assistant-action">开始对话</span>
+                </button>
+                <button class="assistant-card amber" data-view-link="assistant-chat">
+                  <div class="assistant-icon amber">产</div>
+                  <div>
+                    <div class="card-title">产品资料助手</div>
+                    <div class="card-sub">快速检索产品说明书、技术文档及最新版本更新记录</div>
+                  </div>
+                  <span class="assistant-action">开始对话</span>
+                </button>
+                <button class="assistant-card red" data-view-link="assistant-chat">
+                  <div class="assistant-icon red">市</div>
+                  <div>
+                    <div class="card-title">市场营销专家</div>
+                    <div class="card-sub">生成营销文案、分析竞品趋势及策划品牌推广活动</div>
+                  </div>
+                  <span class="assistant-action">开始对话</span>
+                </button>
+              </div>
+            </section>
+          </div>
+
+          <section class="panel home-panel">
+            <div class="workflow-showcase">
+              <div class="workflow-preview">
+                <div class="workflow-preview-title">工作流画布预览</div>
+                <div class="workflow-canvas" aria-label="工作流画布预览">
+                  <div class="flow-node form-node">
+                    <div class="flow-icon">表</div>
+                    <div class="flow-title">表单输入</div>
+                    <div class="flow-desc">收集用户信息</div>
+                  </div>
+                  <div class="flow-arrow left"></div>
+                  <div class="flow-node retrieve-node">
+                    <div class="flow-icon">搜</div>
+                    <div class="flow-title">知识检索</div>
+                    <div class="flow-desc">RAG 检索相关内容</div>
+                  </div>
+                  <div class="flow-arrow right"></div>
+                  <div class="flow-node agent">
+                    <div class="flow-icon">AI</div>
+                    <div class="flow-title">Agent 推理</div>
+                    <div class="flow-desc">模型生成回复</div>
+                  </div>
+                  <span class="flow-chip config">表单配置</span>
+                  <span class="flow-chip rag">RAG</span>
+                  <span class="flow-chip prompt">Prompt</span>
+                </div>
+              </div>
+              <div class="workflow-cta">
+                <h3>立即创建工作流</h3>
+                <p>进入工作流列表，从空白画布或模板开始搭建业务自动化流程。</p>
+                <button class="btn" data-view-link="workflow">开启工作流之旅</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="qa-chat">
+        <div class="qa-session-head"><div><h1>知识问答</h1><span>结合文档与知识图谱，查看回答依据</span></div><button class="btn" id="qaNewChat">＋ 新建问答</button></div>
+        <div class="qa-conversation" id="qaConversation" aria-label="问答内容"></div>
+        <div class="qa-composer">
+          <div class="ask-area">
+            <textarea id="qaFollowQuestion" class="textarea" maxlength="2000" aria-label="继续提问" placeholder="继续提问，每轮可重新选择知识源"></textarea>
+            <div class="ask-toolbar"><button class="select-pill" data-qa-sources="kb">知识源</button><button class="select-pill qa-graph-trigger" data-qa-sources="graphs">⬡ 知识图谱：未选择</button><button id="qaStop" class="btn" hidden>停止回答</button><button id="qaFollowSend" class="send" aria-label="发送追问">↑</button></div>
+          </div>
+          <p class="qa-composer-note" id="qaComposerNote">请结合来源核实回答内容</p>
+        </div>
+      </section>
+
+      <section class="view" id="knowledge">
+        <div class="page-head">
+          <div>
+            <h1>知识库</h1>
+            <p>这里代表当前项目中已有的知识库页签。本原型不展开具体页面，只用于说明 V1.2.2 智能入口与既有页签并存。</p>
+          </div>
+        </div>
+        <div class="panel admin-panel">
+          <div class="section-title">已有页面占位</div>
+          <div class="note-box">
+            知识库列表、知识库详情、文件管理、AI 摘要 / 全文解构 / 知识萃取等具体页面不在本草图中重画；后续只需要在现有知识库详情中接入 AI 页签调整和问答助手悬浮入口。
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="workflow">
+        <div class="page-head">
+          <div>
+            <h1>工作流</h1>
+            <p>这里代表当前项目中已有的工作流页签。本原型不展开工作流列表、编辑器或发布审核页面。</p>
+          </div>
+        </div>
+        <div class="panel admin-panel">
+          <div class="section-title">已有页面占位</div>
+          <div class="note-box">
+            工作流创建、编辑、调试、发布、审核和管理页面沿用现有设计。本草图只表达首页选择工作流执行时的入口交互：选择工作流后输入区按工作流 Schema 展示，不默认暴露自由知识库选择。
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="assistants">
+        <div class="page-head">
+          <div>
+            <h1>场景助手列表</h1>
+            <p>这是独立路由页面，用于承接“我知道业务场景，但不知道该选哪个知识库”的用户路径。点击助手进入专属问答页。</p>
+          </div>
+          <button class="btn">查看权限说明</button>
+        </div>
+
+        <div class="logic-grid" style="margin: 0 0 14px;">
+          <div class="logic-card">
+            <b>部门推荐</b>
+            <span>按用户所属组织展示推荐助手，减少首页负担。</span>
+          </div>
+          <div class="logic-card">
+            <b>知识范围只读</b>
+            <span>助手页不再让用户自由切换知识库，避免和自由问答混淆。</span>
+          </div>
+          <div class="logic-card">
+            <b>权限过滤</b>
+            <span>问答范围 = 助手绑定知识库 ∩ 用户有权限知识库。</span>
+          </div>
+        </div>
+
+        <div class="assistant-list">
+          <button class="assistant-card" data-view-link="assistant-chat">
+            <div class="assistant-icon">HR</div>
+            <div>
+              <div class="card-title">行政人事助手</div>
+              <div class="card-sub">制度咨询、假勤规则、入离职流程。当前可访问 3 / 5 个绑定知识库。</div>
+            </div>
+            <span class="tag green">进入问答</span>
+          </button>
+          <button class="assistant-card" data-view-link="assistant-chat">
+            <div class="assistant-icon green">IT</div>
+            <div>
+              <div class="card-title">IT 技术支持</div>
+              <div class="card-sub">账号、网络、终端设备和系统使用问题。当前可访问 2 / 2 个绑定知识库。</div>
+            </div>
+            <span class="tag green">进入问答</span>
+          </button>
+          <button class="assistant-card" data-view-link="assistant-chat">
+            <div class="assistant-icon amber">产</div>
+            <div>
+              <div class="card-title">产品资料助手</div>
+              <div class="card-sub">面向销售和售前的产品资料查询。当前可访问 4 / 6 个绑定知识库。</div>
+            </div>
+            <span class="tag green">进入问答</span>
+          </button>
+          <button class="assistant-card disabled">
+            <div class="assistant-icon amber">财</div>
+            <div>
+              <div class="card-title">财务报销助手</div>
+              <div class="card-sub">管理员已配置可见范围，但当前用户没有任何绑定知识库权限。</div>
+            </div>
+            <span class="tag amber">联系管理员</span>
+          </button>
+          <button class="assistant-card disabled">
+            <div class="assistant-icon">市</div>
+            <div>
+              <div class="card-title">市场营销助手</div>
+              <div class="card-sub">后台模板已预置，尚未绑定知识库，未对普通用户开放。</div>
+            </div>
+            <span class="tag">待配置</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="view" id="assistant-chat">
+        <div class="assistant-page-grid">
+          <aside class="panel assistant-sidebar">
+            <div class="assistant-icon">HR</div>
+            <h1 style="margin: 12px 0 6px; color: var(--ink); font-size: 20px;">行政人事助手</h1>
+            <div class="card-sub">围绕制度、假勤、入离职流程回答问题。</div>
+            <div class="info-list">
+              <div class="info-item">
+                <div class="info-label">知识范围</div>
+                <div class="info-value">后台绑定 5 个知识库；当前用户可访问 3 个。</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">权限规则</div>
+                <div class="info-value">实际检索范围 = 助手绑定知识库 ∩ 用户有权限知识库。</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">页面规则</div>
+                <div class="info-value">此页不允许用户改知识库，避免和自由问答混淆。</div>
+              </div>
+            </div>
+          </aside>
+
+          <div class="panel chat-panel">
+            <div class="chat-head">
+              <div class="chat-title">
+                <div class="assistant-icon">HR</div>
+                <div>
+                  <h2>行政人事助手</h2>
+                  <div class="card-sub">来自场景助手 · 支持继续追问 · 记录进入我的记录</div>
+                </div>
+              </div>
+              <span class="tag blue">只读知识来源</span>
+            </div>
+            <div class="chat-body">
+              <div class="message user">
+                <div class="bubble">试用期请假会影响转正吗？</div>
+              </div>
+              <div class="message">
+                <div class="bubble">
+                  根据当前可访问的人事制度，试用期请假需要按公司假勤规则提交申请。是否影响转正通常取决于请假时长、考勤记录和试用期考核结论。
+                  <div class="refs">
+                    <span class="tag">员工手册.pdf</span>
+                    <span class="tag">假勤管理制度.docx</span>
+                    <span class="tag">转正流程说明.pdf</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-input">
+              <div class="ask-area">
+                <textarea class="textarea" style="min-height: 70px;" placeholder="继续向行政人事助手提问"></textarea>
+                <div class="ask-toolbar">
+                  <span class="select-pill">知识来源：管理员配置</span>
+                  <span class="select-pill">当前可访问 3 个知识库</span>
+                  <button class="send">↑</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="records">
+        <div class="page-head">
+          <div>
+            <h1>我的记录</h1>
+            <p>列表只做检索和定位；进入某条记录后，右侧展示问答内容摘要、引用文件、命中片段和原文入口。</p>
+          </div>
+          <button class="btn">导出记录</button>
+        </div>
+
+        <div class="record-layout">
+          <section class="panel record-master">
+            <div class="filter-panel">
+              <button class="filter-btn active" data-filter="all">全部 <span>24</span></button>
+              <button class="filter-btn" data-filter="qa">普通问答 <span>12</span></button>
+              <button class="filter-btn" data-filter="assistant">场景助手 <span>7</span></button>
+              <button class="filter-btn" data-filter="workflow">工作流 <span>5</span></button>
+              <button class="filter-btn" data-filter="agent">Agent <span>0</span></button>
+            </div>
+
+            <div class="record-list">
+            <div class="record-item" data-record-type="assistant">
+              <div>
+                <div class="record-meta">
+                  <span class="tag blue">行政人事助手</span>
+                  <span class="tag">场景助手问答</span>
+                  <span class="tag">2026-07-15 10:24</span>
+                </div>
+                <div class="record-title">试用期请假会影响转正吗？</div>
+                <div class="record-desc">保留助手名称、当次可检索知识库范围、引用文件和助手配置版本。</div>
+              </div>
+              <div class="record-action"><button class="btn">查看</button></div>
+            </div>
+
+            <div class="record-item" data-record-type="workflow">
+              <div>
+                <div class="record-meta">
+                  <span class="tag purple">工作流</span>
+                  <span class="tag green">执行成功</span>
+                  <span class="tag">2026-07-15 09:46</span>
+                </div>
+                <div class="record-title">合同要点提取流程</div>
+                <div class="record-desc">展示工作流名称、输入摘要、输出结果、执行状态和过程入口，不混成普通会话。</div>
+              </div>
+              <div class="record-action"><button class="btn">详情</button></div>
+            </div>
+
+            <div class="record-item" data-record-type="qa">
+              <div>
+                <div class="record-meta">
+                  <span class="tag">普通问答</span>
+                  <span class="tag">2 个知识库</span>
+                  <span class="tag">2026-07-14 18:30</span>
+                </div>
+                <div class="record-title">差旅报销标准是多少？</div>
+                <div class="record-desc">来自首页自由问答，用户当时选择了制度知识库和财务知识库。</div>
+              </div>
+              <div class="record-action"><button class="btn">查看</button></div>
+            </div>
+
+            <div class="record-item" data-record-type="assistant">
+              <div>
+                <div class="record-meta">
+                  <span class="tag green">IT 技术支持</span>
+                  <span class="tag">场景助手问答</span>
+                  <span class="tag">2026-07-14 16:12</span>
+                </div>
+                <div class="record-title">VPN 连接失败怎么排查？</div>
+                <div class="record-desc">若助手后续停用，历史仍可查看，但不允许继续追问。</div>
+              </div>
+              <div class="record-action"><button class="btn">查看</button></div>
+            </div>
+            </div>
+          </section>
+
+          <aside class="panel record-detail">
+            <h2 class="detail-title">选中记录详情</h2>
+            <p class="detail-summary">右侧展示当前选中记录的原始问答内容和引用证据，不要求后端额外生成摘要。</p>
+            <div class="record-meta">
+              <span class="tag blue">场景助手</span>
+              <span class="tag">行政人事助手</span>
+              <span class="tag">引用 3 条</span>
+            </div>
+
+            <div class="detail-block">
+              <h3>问答内容</h3>
+              <div class="qa-thread">
+                <div class="thread-row">
+                  <div class="thread-label">问题</div>
+                  <div class="thread-box">试用期请假会影响转正吗？</div>
+                </div>
+                <div class="thread-row">
+                  <div class="thread-label">回答</div>
+                  <div class="thread-box answer">
+                    根据当前可访问的人事制度，试用期请假需要按公司假勤规则提交申请。是否影响转正通常取决于请假时长、考勤记录和试用期考核结论。
+                    <br><br>
+                    如果请假时间较短，并且已经完成审批，一般不会直接影响转正；如果请假频次较高或影响试用期考核周期，建议提前与直属上级和 HR 确认是否需要顺延考核或补充说明。
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="detail-block">
+              <h3>引用来源</h3>
+              <div class="quote-card">
+                <div class="quote-name">员工手册.pdf</div>
+                <div class="quote-text">命中片段：试用期员工应遵守公司考勤与请假制度，相关记录进入试用期考核参考。</div>
+                <button class="btn text">查看原文</button>
+              </div>
+              <div class="quote-card">
+                <div class="quote-name">假勤管理制度.docx</div>
+                <div class="quote-text">命中片段：请假需通过系统提交申请，并由直属上级审批后生效。</div>
+                <button class="btn text">查看原文</button>
+              </div>
+              <div class="quote-card">
+                <div class="quote-name">转正流程说明.pdf</div>
+                <div class="quote-text">命中片段：转正评估综合工作表现、考勤情况、导师反馈和部门负责人意见。</div>
+                <button class="btn text">查看原文</button>
+              </div>
+            </div>
+
+            <div class="detail-block">
+              <h3>其他类型记录</h3>
+              <div class="quote-text">
+                工作流记录在这里展示输入、输出、执行状态和节点日志；若流程中引用知识，也复用同一引用来源面板。
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <dialog id="qaSourceDialog" class="qa-dialog" aria-labelledby="qaSourceTitle">
+    <div class="qa-dialog-head"><h2 id="qaSourceTitle">回答数据源</h2><button class="qa-close" data-qa-close="qaSourceDialog" aria-label="关闭知识源选择">×</button></div>
+    <div class="qa-source-body">
+      <div class="qa-source-tabs" role="tablist" aria-label="知识源类型"><button role="tab" id="qaKbTab" data-qa-tab="kb" aria-selected="true" aria-controls="qaSourceList">知识库</button><button role="tab" id="qaDocsTab" data-qa-tab="docs" aria-selected="false" aria-controls="qaSourceList">文档</button><button role="tab" id="qaGraphsTab" data-qa-tab="graphs" aria-selected="false" aria-controls="qaSourceList">知识图谱</button></div>
+      <input id="qaSourceSearch" class="input" maxlength="50" aria-label="搜索知识源" placeholder="请输入知识库名称">
+      <p id="qaSourceHint" class="qa-source-hint">知识库或文档可搭配知识图谱一起使用。</p>
+      <div id="qaSourceList" class="qa-source-list" role="tabpanel" aria-labelledby="qaKbTab"></div>
+    </div>
+    <div class="qa-dialog-footer"><div><span id="qaSelectionCount"></span><button class="btn text" id="qaClearSources">清空</button></div><div><button class="btn" data-qa-close="qaSourceDialog">取消</button><button class="btn primary" id="qaConfirmSources">确定</button></div></div>
+  </dialog>
+  <dialog id="qaEvidenceDialog" class="qa-dialog qa-detail-dialog" aria-labelledby="qaEvidenceTitle"><div class="qa-dialog-head"><h2 id="qaEvidenceTitle">引用详情</h2><button class="qa-close" data-qa-close="qaEvidenceDialog" aria-label="关闭引用详情">×</button></div><div id="qaEvidenceBody" class="qa-detail-body"></div><div class="qa-dialog-footer"><span>本次回答引用的来源快照</span><button class="btn" data-qa-close="qaEvidenceDialog">关闭</button></div></dialog>
+  <div id="qaToast" class="qa-toast" role="status" hidden></div>
+
+  <script>
+    const navButtons = document.querySelectorAll('.nav-btn[data-view]');
+    const views = document.querySelectorAll('.view');
+
+    function switchView(viewId) {
+      views.forEach((view) => view.classList.toggle('active', view.id === viewId));
+      navButtons.forEach((button) => button.classList.toggle('active', button.dataset.view === (viewId === 'qa-chat' ? 'home' : viewId)));
+    }
+
+    // 支持从其他原型直接进入指定视图，仅接受当前页面已有的视图名称。
+    function syncViewFromHash() {
+      const viewId = window.location.hash.slice(1);
+      if (Array.from(views).some((view) => view.id === viewId)) switchView(viewId);
+    }
+
+    syncViewFromHash();
+    window.addEventListener('hashchange', syncViewFromHash);
+
+    navButtons.forEach((button) => {
+      button.addEventListener('click', () => switchView(button.dataset.view));
+    });
+
+    document.querySelectorAll('[data-view-link]').forEach((button) => {
+      button.addEventListener('click', () => switchView(button.dataset.viewLink));
+    });
+
+    const filterButtons = document.querySelectorAll('[data-filter]');
+    const recordItems = document.querySelectorAll('[data-record-type]');
+
+    filterButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const type = button.dataset.filter;
+        filterButtons.forEach((item) => item.classList.toggle('active', item === button));
+        recordItems.forEach((item) => {
+          item.style.display = type === 'all' || item.dataset.recordType === type ? 'grid' : 'none';
+        });
+      });
+    });
+  </script>
+  <script src="knowledge-graph/qa-evidence.js"></script>
+  <script src="knowledge-graph/qa.js"></script>
+  <script src="knowledge-graph/notification-data.js?v=41"></script>
+  <script src="knowledge-graph/notification-center.js?v=36"></script>
+</body>
+</html>

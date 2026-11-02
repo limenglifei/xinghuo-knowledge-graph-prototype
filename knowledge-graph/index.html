@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>星火知识库 - 知识图谱</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root { --blue:#3f6fff; --soft:#edf3ff; --ink:#1f2430; --text:#323847; --muted:#7c8597; --line:#e5e9f2; --green:#169365; --red:#e5484d; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--text); background:#fff; font:14px/1.5 "PingFang SC","Microsoft YaHei",Arial,sans-serif; }
+    button,input,select,textarea { font:inherit; } button { cursor:pointer; }
+    a { color:inherit; text-decoration:none; } button,a { touch-action:manipulation; }
+    button:focus-visible,a:focus-visible { outline:2px solid var(--blue); outline-offset:3px; }
+    button:disabled { cursor:not-allowed; opacity:.45; } [hidden] { display:none !important; }
+    .app { display:grid; grid-template-columns:212px minmax(0,1fr); min-height:100vh; }
+    .sidebar { display:flex; flex-direction:column; padding:20px 12px; background:#f7f8fc; border-right:1px solid var(--line); }
+    .brand { display:flex; align-items:center; gap:10px; height:36px; padding:0 14px; font-size:20px; font-weight:800; color:var(--ink); white-space:nowrap; }
+    /* 品牌标识沿用工作流原型；业务区域使用实色。 */
+    .brand-mark { flex-shrink:0; width:24px; height:24px; border-radius:7px; background:linear-gradient(135deg,#23c1ff 0 38%,transparent 38%),linear-gradient(225deg,#3f6fff 0 45%,transparent 45%),linear-gradient(315deg,#5bd592 0 48%,transparent 48%),#eaf2ff; }
+    .nav { display:flex; flex-direction:column; gap:12px; margin-top:24px; }
+    .nav-item { position:relative; display:flex; align-items:center; gap:12px; height:42px; padding:0 14px; border-radius:8px; font-size:15px; }
+    .nav-item:hover { background:#fff; } .nav-item.active { background:#fff; color:var(--blue); font-weight:600; }
+    .nav-item.active::before { content:""; position:absolute; left:0; top:10px; height:22px; width:3px; border-radius:0 2px 2px 0; background:var(--blue); }
+    .icon { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+    .sidebar-note { margin:auto 12px 0; padding-top:40px; color:var(--muted); font-size:12px; }
+    main { min-width:0; padding:20px 28px 36px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; height:38px; color:var(--muted); font-size:13px; }
+    .topbar-right { display:flex; align-items:center; gap:16px; }
+    .preview-badge { border:1px solid var(--line); border-radius:4px; padding:2px 8px; }
+    .avatar { display:grid; place-items:center; width:32px; height:32px; border-radius:50%; color:#fff; background:#5a7dff; }
+    .content { max-width:1220px; margin:36px auto 0; }
+    .page-head { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+    h1 { margin:0; font-size:26px; font-weight:650; color:var(--ink); }
+    .page-desc { margin:8px 0 0; color:var(--muted); }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:34px; padding:0 14px; border:1px solid #dbe1ec; border-radius:6px; color:var(--text); background:#fff; white-space:nowrap; }
+    .btn:hover { color:var(--blue); border-color:var(--blue); }
+    .btn.primary { color:#fff; background:var(--blue); border-color:var(--blue); }
+    .btn.primary:hover { background:#315fe7; }
+    .btn.danger-fill { color:#fff; background:var(--red); border-color:var(--red); }
+    .btn.small { min-height:30px; padding:0 10px; font-size:13px; }
+    .btn.dashed { border-style:dashed; color:var(--blue); }
+    .link-btn { padding:4px 2px; border:0; background:none; color:var(--blue); white-space:nowrap; }
+    .link-btn:hover { text-decoration:underline; } .link-btn.danger { color:var(--red); }
+    .tabs { display:flex; gap:28px; border-bottom:1px solid var(--line); margin-top:25px; }
+    .tab { position:relative; padding:12px 0; border:0; background:none; color:#667085; }
+    .tab.active { color:var(--blue); font-weight:600; }
+    .tab.active::after { content:""; position:absolute; height:2px; bottom:-1px; left:0; right:0; background:var(--blue); }
+    .tab span { margin-left:7px; font-size:12px; padding:1px 6px; background:#f1f3f7; border-radius:4px; }
+    .tab.active span { color:var(--blue); background:var(--soft); }
+    .filter-bar { display:flex; align-items:center; gap:10px; padding:22px 0 18px; }
+    .search-wrap { position:relative; width:280px; }
+    .search-wrap .icon { position:absolute; top:9px; left:11px; color:#98a2b3; width:16px; height:16px; }
+    .result-count { margin-left:auto; color:var(--muted); font-size:13px; }
+    input:not([type=checkbox]),textarea,select { width:100%; min-height:34px; border:1px solid #dbe1ec; border-radius:6px; padding:6px 10px; color:var(--text); background:#fff; outline:none; }
+    .search-wrap input:not([type=checkbox]) { padding-left:34px; }
+    input::placeholder,textarea::placeholder { color:#a0a8b7; }
+    input:focus,textarea:focus,select:focus { border-color:var(--blue) !important; box-shadow:0 0 0 2px var(--soft); }
+    input[aria-invalid=true],select[aria-invalid=true] { border-color:var(--red) !important; }
+    textarea { resize:none; line-height:1.6; }
+    .cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+    .ontology-card { min-width:0; border:1px solid var(--line); border-radius:10px; background:#fff; overflow:hidden; transition:border-color .15s; }
+    .ontology-card:hover { border-color:#b4c7ff; }
+    .card-main { padding:20px 20px 16px; } .card-heading { display:flex; align-items:center; gap:11px; }
+    .ontology-symbol { display:grid; place-items:center; width:36px; height:36px; border-radius:8px; color:var(--blue); background:var(--soft); flex-shrink:0; }
+    .ontology-symbol .icon { width:21px; height:21px; }
+    .card-title { margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; font-size:16px; font-weight:600; color:var(--ink); }
+    .status { display:inline-flex; align-items:center; gap:5px; margin-left:auto; flex-shrink:0; padding:2px 7px; border-radius:4px; font-size:12px; color:var(--green); background:#edf8f3; }
+    .status::before { content:""; width:5px; height:5px; border-radius:50%; background:currentColor; }
+    .status.off { background:#f1f3f6; color:#808899; }
+    .card-desc { color:var(--muted); font-size:13px; margin:15px 0 18px; height:42px; line-height:21px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
+    .card-stats { display:flex; gap:22px; font-size:12px; color:var(--muted); }
+    .card-stats strong { margin-right:5px; color:var(--text); font-size:18px; font-weight:600; }
+    .entity-tags { display:flex; gap:6px; margin:14px 0; min-height:24px; overflow:hidden; }
+    .entity-tag { max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border-radius:4px; background:#f6f7f9; padding:3px 8px; color:#657088; font-size:12px; }
+    .created { color:#9199a8; font-size:12px; }
+    .card-footer { display:flex; align-items:center; gap:19px; padding:9px 20px; border-top:1px solid #eef0f5; }
+    .card-footer button { font-size:13px; } .card-footer .danger { margin-left:auto; }
+    .preview-note { color:#9199a8; font-size:12px; margin:20px 0; }
+    .empty { padding:64px 20px; grid-column:1/-1; text-align:center; border:1px dashed var(--line); border-radius:10px; }
+    .empty h2 { margin:0; font-size:18px; font-weight:600; } .empty p { color:var(--muted); margin:8px 0 20px; }
+    dialog { border:0; padding:0; border-radius:10px; color:var(--text); box-shadow:0 16px 60px #17233e33; }
+    dialog::backdrop { background:#1f293766; }
+    .editor { width:min(860px,calc(100vw - 64px)); max-height:calc(100vh - 64px); }
+    .dialog-layout { display:flex; flex-direction:column; max-height:calc(100vh - 64px); }
+    .dialog-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--line); flex-shrink:0; }
+    .dialog-header h2 { margin:0; font-size:18px; font-weight:600; color:var(--ink); overflow-wrap:anywhere; }
+    .close { border:0; padding:0; background:none; color:#8a94a7; font-size:24px; line-height:28px; width:28px; height:28px; flex-shrink:0; }
+    .close:hover { color:var(--blue); background:var(--soft); border-radius:4px; }
+    .dialog-body { padding:22px 24px; overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; }
+    .form-row { display:grid; grid-template-columns:82px minmax(0,1fr); gap:12px; margin-bottom:18px; align-items:start; }
+    .form-label { text-align:right; padding-top:7px; } .required { color:var(--red); margin-right:4px; }
+    .help { color:var(--muted); font-size:12px; margin:6px 0 0; } .length { float:right; }
+    .type-section { border-top:1px solid var(--line); padding-top:18px; margin-top:20px; }
+    .section-heading { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .section-heading h3 { margin:0; font-size:14px; font-weight:600; }
+    .section-heading small { color:var(--muted); font-weight:400; font-size:12px; margin-left:8px; }
+    .entity-row { display:grid; grid-template-columns:minmax(140px,1fr) 38px 80px 42px; gap:12px; align-items:center; margin:9px 0; }
+    .relation-row { display:grid; grid-template-columns:minmax(120px,1.2fr) minmax(110px,1fr) 15px minmax(110px,1fr) 76px 40px; gap:9px; align-items:center; margin:9px 0; }
+    .row-head { color:var(--muted); font-size:12px; } .arrow { text-align:center; color:#98a2b3; } .section-add { margin-top:8px; }
+    .dialog-footer { display:flex; gap:10px; align-items:center; justify-content:flex-end; padding:16px 24px; border-top:1px solid var(--line); background:#fff; flex-shrink:0; }
+    .footer-note { margin-right:auto; font-size:12px; color:var(--muted); }
+    .form-error { border:1px solid #ffd4d4; background:#fff5f5; color:#c2353b; padding:9px 12px; border-radius:6px; margin:0 0 16px; font-size:13px; }
+    .property-dialog { width:min(940px,calc(100vw - 64px)); max-height:calc(100vh - 96px); }
+    .property-dialog .dialog-layout { max-height:calc(100vh - 96px); }
+    .property-row { display:grid; grid-template-columns:minmax(140px,1fr) 104px 40px minmax(240px,1.8fr) 40px; gap:12px; align-items:center; margin:10px 0; }
+    .check-cell { display:flex; justify-content:center; } input[type=checkbox] { width:15px; height:15px; accent-color:var(--blue); }
+    .confirm-dialog { width:min(440px,calc(100vw - 64px)); }
+    .confirm-dialog p { margin:0; line-height:1.8; overflow-wrap:anywhere; }
+    .toast { position:fixed; z-index:100; top:22px; left:50%; transform:translateX(-50%); padding:10px 20px; background:white; border:1px solid #dce8e1; border-radius:8px; box-shadow:0 5px 22px #24324c18; color:#26714e; }
+    .prototype-load-notice { position:fixed; z-index:110; top:72px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:18px; width:min(600px,calc(100vw - 48px)); padding:14px 18px; border:1px solid var(--line); border-radius:8px; background:#fff; box-shadow:0 5px 22px #24324c18; }
+    .prototype-load-notice p { margin:4px 0 0; color:var(--muted); font-size:12px; line-height:1.6; }
+    .prototype-load-notice .btn { flex-shrink:0; margin-left:auto; }
+    @media (max-width:1300px) { .cards { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:1000px) { .app { grid-template-columns:76px minmax(0,1fr); } .brand { padding:0 14px; } .brand-name,.nav-label,.sidebar-note { display:none; } .nav-item { justify-content:center; padding:0; } main { padding:20px; } }
+  </style>
+  <!-- 页面与依赖统一更新版本，避免长期打开的预览混用旧脚本。 -->
+  <link rel="stylesheet" href="ontology-editor.css?v=36">
+  <link rel="stylesheet" href="extraction.css?v=39">
+  <link rel="stylesheet" href="results.css?v=36">
+  <link rel="stylesheet" href="fusion.css?v=36">
+  <link rel="stylesheet" href="quality.css?v=36">
+  <link rel="stylesheet" href="terminology.css?v=36">
+  <link rel="stylesheet" href="fusion-task.css?v=36">
+  <link rel="stylesheet" href="graph-catalog.css?v=40">
+  <link rel="stylesheet" href="application.css?v=36">
+  <link rel="stylesheet" href="application-explorer.css?v=36">
+  <link rel="stylesheet" href="notification-center.css?v=36">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <symbol id="graph-icon" viewBox="0 0 24 24"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="18" r="3"/><circle cx="19" cy="18" r="3"/><path d="m10.5 7.5-4 8m7-8 4 8M8 18h8"/></symbol>
+    <symbol id="workflow-icon" viewBox="0 0 24 24"><rect x="3.5" y="4" width="6" height="5" rx="1.4"/><rect x="14.5" y="15" width="6" height="5" rx="1.4"/><path d="M9.5 6.5h3.3a3.7 3.7 0 0 1 3.7 3.7V15"/></symbol>
+  </defs></svg>
+  <div class="app" id="listView">
+    <aside class="sidebar">
+      <a class="brand" href="../v122-ai-entry-architecture.html"><span class="brand-mark"></span><span class="brand-name">星火知识库</span></a>
+      <nav class="nav" aria-label="主导航">
+        <a class="nav-item" href="../v122-ai-entry-architecture.html#home" title="首页"><svg class="icon" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7M5 9v12h14V9M9 21v-7h6v7"/></svg><span class="nav-label">首页</span></a>
+        <a class="nav-item" href="../v122-ai-entry-architecture.html#records" title="历史问答"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5h16v12H8l-4 3zM8 9h8M8 13h5"/></svg><span class="nav-label">历史问答</span></a>
+        <a class="nav-item" href="../v122-ai-entry-architecture.html#knowledge" title="知识库"><svg class="icon" viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg><span class="nav-label">知识库</span></a>
+        <a class="nav-item" id="termsMenu" href="#tab=terms" title="术语库"><svg class="icon" viewBox="0 0 24 24"><path d="M4 4h6a3 3 0 0 1 3 3v14a4 4 0 0 0-4-2H4zM13 7a3 3 0 0 1 3-3h5v15h-4a4 4 0 0 0-4 2M7 8h3M7 12h3M16 8h2M16 12h2"/></svg><span class="nav-label">术语库</span></a>
+        <a class="nav-item active" id="graphMenu" href="#tab=modeling" aria-current="page" title="知识图谱"><svg class="icon"><use href="#graph-icon"/></svg><span class="nav-label">知识图谱</span></a>
+        <a class="nav-item" href="../workflow-menu.html" title="工作流"><svg class="icon"><use href="#workflow-icon"/></svg><span class="nav-label">工作流</span></a>
+        <a class="nav-item" href="../v122-ai-entry-architecture.html#assistant-chat" title="智能体"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="13" rx="3"/><path d="M12 3v4M2 12h2M20 12h2M8 16h8"/><circle cx="8" cy="11" r=".7"/><circle cx="16" cy="11" r=".7"/></svg><span class="nav-label">智能体</span></a>
+        <a class="nav-item" href="../v122-ai-entry-architecture.html#assistants" title="场景助手"><svg class="icon" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z"/></svg><span class="nav-label">场景助手</span></a>
+      </nav><div class="sidebar-note">知识图谱 · 产品原型</div>
+    </aside>
+    <main>
+      <header class="topbar"><span>知识应用 / 知识图谱</span><div class="topbar-right"><span class="preview-badge">原型预览</span><button type="button" class="kg-message-trigger" data-kg-notifications aria-label="消息中心"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4M12 2V1"/></svg></button><span class="avatar" aria-label="当前用户：管理员">管</span></div></header>
+      <div class="content kg-content" id="graphPage">
+        <div class="page-head"><h1>知识图谱</h1></div>
+        <nav class="module-tabs" id="moduleTabs" aria-label="知识图谱功能"><button class="active" data-module-tab="modeling" aria-pressed="true">本体建模</button><button data-module-tab="extraction" aria-pressed="false">知识抽取</button><button data-module-tab="fusion" aria-pressed="false">知识融合</button><button data-module-tab="quality" aria-pressed="false">图谱质检</button></nav>
+        <p class="gc-module-desc" id="pageDescription">定义实体、关系与属性，统一知识表达，为抽取、融合和应用建立清晰的结构。</p>
+        <section id="modelingPanel" data-module-panel="modeling" aria-label="本体建模">
+        <form class="filter-bar gc-modeling-filters" id="searchForm"><div class="search-wrap"><svg class="icon" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 4.5 4.5"/></svg><input id="ontologySearch" type="search" maxlength="50" placeholder="搜索本体名称或描述" aria-label="搜索本体名称或描述"></div><label>状态<select id="ontologyStatus" aria-label="本体状态"></select></label><button class="btn" type="submit">搜索</button><button class="link-btn" type="button" id="resetFilters">重置</button><span class="result-count" id="resultCount" aria-live="polite"></span><button class="btn primary" type="button" id="createOntology"><span aria-hidden="true">＋</span>新增本体</button></form>
+        <section class="cards" id="ontologyCards" aria-label="本体列表" data-testid="ontology-list"></section>
+        </section>
+        <section id="extractionPanel" data-module-panel="extraction" aria-label="知识抽取" hidden>
+          <section id="extractionOverview" data-graph-overview="extraction" aria-label="本体知识抽取卡片"></section>
+          <section id="extractionDetailView" class="gc-detail" hidden>
+          <div id="extractionDetailHeader"></div>
+          <div id="extractionUnavailable" class="gc-unavailable" hidden></div>
+          <section id="extractionBoardView">
+            <div class="rb-filter"><label hidden>选择本体<select id="rbOntology" aria-label="看板本体"></select></label><strong class="gc-section-label">本体抽取看板</strong><div class="rb-module-actions"><button class="btn" id="openExtractionRecords" aria-haspopup="dialog" aria-controls="extractionRecordsDialog">抽取任务记录</button><button class="btn primary" id="createExtraction"><span aria-hidden="true">＋</span>创建抽取任务</button></div></div>
+            <div id="rbBoardEmpty" class="ex-empty" hidden><h3>暂无可用的已发布本体</h3><p>请先在本体建模中完成发布并启用。</p><button class="btn" data-go-module="modeling">前往本体建模</button></div>
+            <div class="rb-workspace" id="rbWorkspace"><aside class="rb-tree" id="rbTree" aria-label="本体类型导航"></aside><section class="rb-main"><div id="rbSummary"></div>
+              <form class="rb-result-filters" id="rbResultFilters" aria-label="抽取结果筛选">
+                <label class="rb-keyword-field">关键词<input id="rbSearch" type="search" maxlength="50" placeholder="搜索实体名称、关系、属性或来源" aria-label="搜索抽取结果"></label>
+                <div class="rb-status-field"><span>审核状态</span><details class="rb-status-filter" id="rbStatus"><summary id="rbStatusSummary" aria-label="审核状态，可多选" aria-controls="rbStatusOptions"><span id="rbStatusText">全部状态</span><span aria-hidden="true">⌄</span></summary><div class="rb-status-options" id="rbStatusOptions" role="group" aria-label="选择审核状态"><button type="button" id="rbStatusAll" aria-pressed="true">全部状态</button><label><input type="checkbox" data-rb-status="pending">待审核</label><label><input type="checkbox" data-rb-status="approved">已审核通过</label><label><input type="checkbox" data-rb-status="rejected">已审核未通过</label><small>可多选，清空后显示全部</small></div></details></div>
+                <div class="rb-filter-actions"><span>仅筛选下方结果</span><button type="button" class="btn small" id="rbResetFilters">重置</button></div>
+              </form><div id="rbResults"></div></section></div>
+          </section>
+          </section>
+        </section>
+        <section id="fusionModule" data-module-panel="fusion" aria-label="知识融合" hidden>
+          <section id="fusionOverview" data-graph-overview="fusion" aria-label="知识融合图谱卡片"></section>
+          <section id="fusionDetailView" class="gc-detail" hidden><div id="fusionDetailHeader"></div><div id="fusionUnavailable" class="gc-unavailable" hidden></div><section id="fusionPanel"></section></section>
+        </section>
+        <section id="qualityModule" data-module-panel="quality" aria-label="图谱质检" hidden>
+          <section id="qualityOverview" data-graph-overview="quality" aria-label="图谱质检卡片"></section>
+          <section id="qualityDetailView" class="gc-detail" hidden><div id="qualityDetailHeader"></div><div id="qualityUnavailable" class="gc-unavailable" hidden></div><section id="qualityPanel"></section></section>
+        </section>
+        <p class="preview-note">当前为示例演示，新增与修改仅在本次页面中生效，刷新后恢复初始内容。</p>
+      </div>
+      <section class="content" id="terminologyPage" aria-label="术语库" hidden></section>
+    </main>
+  </div>
+  <section class="builder" id="editorView" hidden aria-label="本体编辑详情">
+    <header class="builder-header">
+      <button class="btn back-btn" id="backToList" aria-label="返回本体列表">←</button>
+      <div class="builder-title"><h1 id="builderName">本体编辑</h1><span id="builderStatus" class="status"></span></div>
+      <span class="save-indicator" id="saveIndicator">草稿已保存</span>
+      <div class="builder-header-actions"><button class="btn" id="showHistory">审核历史</button><button type="button" class="kg-message-trigger" data-kg-notifications aria-label="消息中心"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4M12 2V1"/></svg></button><span class="preview-badge">原型预览</span></div>
+    </header>
+    <div id="workflowNotice" class="workflow-notice" role="status"></div>
+    <div class="builder-workspace">
+      <section class="config-pane" aria-label="本体配置">
+        <div class="basic-summary"><div class="section-heading"><h2>基本信息</h2><button class="link-btn" id="editBasic">编辑</button></div><strong id="summaryName"></strong><p id="summaryDescription"></p></div>
+        <button class="ai-entry" id="openAI"><span class="ai-mark">✦</span><span><strong>AI 辅助构建</strong><small>根据本体名称和描述，生成实体、关系和属性建议</small></span><span aria-hidden="true">›</span></button>
+        <div class="config-tabs" role="group" aria-label="配置模块"><button class="config-tab active" data-config-tab="entities">实体类型 <span id="entityCount">0</span></button><button class="config-tab" data-config-tab="relations">关系定义 <span id="relationCount">0</span></button></div>
+        <p class="form-error" id="structureError" role="alert" hidden></p>
+        <fieldset id="structureFields">
+          <div id="entitiesPanel"><div class="module-head"><p>定义图谱中的对象及其属性</p><button class="btn small" id="addEntity" type="button">＋ 添加实体</button></div><div id="entityRows"></div><div class="module-empty" id="entitiesEmpty"><p>还没有实体类型</p><small>可以手动添加，也可以使用 AI 辅助构建。</small></div></div>
+          <div id="relationsPanel" hidden><div class="module-head"><p>为两个实体定义有方向的关联</p><button class="btn small" id="addRelation" type="button">＋ 添加关系</button></div><div id="relationRows"></div><div class="module-empty" id="relationsEmpty"><p>还没有关系定义</p><small>添加实体后，可定义它们之间的关系。</small></div></div>
+        </fieldset>
+        <p class="config-note">草稿可以随时保存，完成结构定义后再提交发布审核。</p>
+      </section>
+      <section class="preview-pane" aria-label="本体可视化预览">
+        <div class="preview-heading"><div><h2>本体可视化预览</h2><p id="previewSummary">0 个实体类型 · 0 个关系</p></div><div class="segmented" id="previewVersions"><button class="active" data-preview="draft">当前草稿</button><button data-preview="live" id="livePreviewButton" hidden>已发布版本</button></div></div>
+        <div class="graph-wrap"><div id="graphCanvas" data-testid="graph-preview"></div><div class="graph-tools"><button class="btn small" id="zoomIn" aria-label="放大图谱">＋</button><button class="btn small" id="zoomOut" aria-label="缩小图谱">−</button><button class="btn small" id="resetGraph">适应画布</button></div><span class="graph-hint">拖动画布移动 · 点击节点或连线查看</span></div>
+        <div class="graph-legend" id="graphLegend"></div>
+        <div class="selection-detail" id="selectionDetail"><strong>预览说明</strong><p>左侧修改会实时呈现在图谱中。这里展示本体结构，不包含实际业务数据。</p></div>
+      </section>
+    </div>
+    <footer class="builder-footer"><div><span id="availabilityText">尚未发布，不可用于图谱构建</span><small>本页为交互演示，刷新后恢复示例。</small></div><span id="saveFirstHint" class="help" hidden>请先保存草稿，再提交审核</span><button class="btn" id="saveDraft">保存草稿</button><button class="btn" id="withdrawReview" hidden>撤回申请</button><button class="btn primary" id="submitReview">提交发布审核</button></footer>
+  </section>
+
+  <dialog class="extraction-wizard" id="extractionWizard" aria-labelledby="extractionWizardTitle"><form class="dialog-layout" id="extractionForm" novalidate><header class="dialog-header"><h2 id="extractionWizardTitle">创建抽取任务</h2><button class="close" type="button" id="closeExtraction" aria-label="关闭创建抽取任务">×</button></header><nav class="ex-steps" id="extractionSteps" aria-label="创建抽取任务步骤"></nav><div class="ex-wizard-scroll"><p class="form-error" id="extractionError" role="alert" hidden></p><div id="extractionStepBody"></div></div><footer class="dialog-footer"><span class="footer-note" id="extractionStepHint"></span><button class="btn" type="button" id="cancelExtraction">取消</button><button class="btn" type="button" id="extractionPrev" hidden>上一步</button><button class="btn primary" type="button" id="extractionNext">下一步</button><button class="btn primary" type="submit" id="createExtractionTask" hidden>创建任务</button></footer></form></dialog>
+  <dialog class="ex-task-drawer rb-records-drawer" id="extractionRecordsDialog" aria-labelledby="extractionRecordsTitle"><div class="dialog-layout"><header class="dialog-header"><h2 id="extractionRecordsTitle">抽取任务记录</h2><button class="close" data-close-dialog="extractionRecordsDialog" aria-label="关闭抽取任务记录">×</button></header><div class="dialog-body">
+    <section id="extractionTasksView" aria-label="抽取任务列表">
+      <form class="ex-filter-bar" id="extractionSearchForm"><label>所属本体<select id="extractionOntologyFilter" aria-label="筛选所属本体"><option value="all">全部本体</option></select></label><label>任务状态<select id="extractionStatusFilter" aria-label="筛选任务状态"><option value="all">全部状态</option><option value="running">运行中</option><option value="completed">已完成</option><option value="partial">部分失败</option></select></label><input id="extractionSearch" type="search" maxlength="50" placeholder="搜索任务名称或本体元素" aria-label="搜索抽取任务"><button class="btn" type="submit">搜索</button><button class="link-btn" type="button" id="resetExtractionFilters">重置</button></form>
+      <div class="ex-list-heading"><h2>抽取任务 <span id="extractionTaskCount"></span></h2><span>点击本体元素数量查看明细</span></div>
+      <div class="ex-table-wrap"><table class="ex-task-table"><thead><tr><th>任务名称 / 所属本体</th><th>文档范围</th><th>状态</th><th>本体元素</th></tr></thead><tbody id="extractionTaskRows"></tbody></table><div class="ex-empty" id="extractionTaskEmpty" hidden><h3>没有找到符合条件的任务</h3><p>试试其他关键词，或重置筛选条件。</p><button class="btn" id="clearExtractionSearch">重置筛选</button></div></div>
+      <div class="ex-pagination"><span id="extractionPageInfo"></span><button class="btn small" id="extractionPagePrev" aria-label="上一页任务">上一页</button><button class="btn small" id="extractionPageNext" aria-label="下一页任务">下一页</button></div>
+    </section>
+  </div><footer class="dialog-footer"><span class="footer-note">关闭后回到当前本体的抽取看板</span><button class="btn" data-close-dialog="extractionRecordsDialog">关闭</button></footer></div></dialog>
+  <dialog class="ex-elements-dialog" id="extractionElementsDialog" aria-labelledby="extractionElementsTitle"><div class="dialog-layout"><header class="dialog-header"><div><h2 id="extractionElementsTitle">抽取结果明细</h2><p class="help" id="extractionElementsMeta"></p></div><button type="button" class="close" data-close-dialog="extractionElementsDialog" aria-label="关闭抽取结果明细">×</button></header><div class="dialog-body"><p class="notice">仅展示本次任务的抽取记录；已合并记录仍保留，来源片段按本任务文档范围展示。</p><div id="extractionElementsBody"></div></div><footer class="dialog-footer"><button type="button" class="btn" data-close-dialog="extractionElementsDialog">关闭</button></footer></div></dialog>
+  <dialog class="ex-task-drawer" id="extractionTaskDialog" aria-labelledby="extractionTaskTitle"><div class="dialog-layout"><header class="dialog-header"><h2 id="extractionTaskTitle">抽取任务详情</h2><button class="close" data-close-dialog="extractionTaskDialog" aria-label="关闭抽取任务详情">×</button></header><div class="dialog-body" id="extractionTaskDetail"></div><footer class="dialog-footer"><button class="btn" id="viewExtractionOntology">查看本体</button><button class="btn" data-close-dialog="extractionTaskDialog">关闭</button><button class="btn primary" id="retryExtractionTask" hidden>重试失败部分</button></footer></div></dialog>
+  <dialog class="basic-dialog" id="ontologyDialog" aria-labelledby="basicTitle">
+    <form id="ontologyForm" class="dialog-layout" novalidate>
+      <header class="dialog-header"><h2 id="basicTitle">新增本体</h2><button type="button" class="close" id="closeEditor" aria-label="关闭基本信息弹窗">×</button></header>
+      <div class="dialog-body"><p class="form-error" id="editorError" role="alert" hidden></p>
+        <div class="basic-field"><label for="ontologyName"><span class="required">*</span>本体名称</label><input id="ontologyName" maxlength="50" placeholder="例如：生物医药" required><span class="help" id="nameLength">0 / 50</span></div>
+        <div class="basic-field"><label for="ontologyDesc">描述</label><textarea id="ontologyDesc" rows="3" maxlength="200" placeholder="描述知识领域、用途，以及关注的对象和关联"></textarea><span class="help" id="descLength">0 / 200</span></div>
+        <label class="ai-create-option" id="aiCreateOption"><input type="checkbox" id="createWithAI"><span>创建后使用 AI 辅助构建<small>根据名称和描述提供结构建议，确认后加入草稿。</small></span></label>
+        <p class="notice muted-notice" id="createNotice">创建后为草稿。请在编辑页完善实体与关系，保存并提交审核，通过后方可使用。</p>
+      </div>
+      <footer class="dialog-footer"><button class="btn" type="button" id="cancelEditor">取消</button><button class="btn primary" type="submit" id="saveOntology">创建草稿</button></footer>
+    </form>
+  </dialog>
+
+  <dialog class="ai-dialog" id="aiDialog" aria-labelledby="aiTitle">
+    <div class="dialog-layout"><header class="dialog-header"><h2 id="aiTitle">AI 辅助构建</h2><button class="close" id="closeAI" aria-label="关闭 AI 辅助构建">×</button></header><div class="dialog-body">
+      <div class="ai-source" aria-label="本次生成依据"><h3>根据以下基本信息生成</h3><dl><dt>本体名称</dt><dd id="aiSourceName"></dd><dt>描述</dt><dd id="aiSourceDescription"></dd></dl><p class="help">无需重复填写。如需调整生成依据，请返回编辑页修改基本信息。</p></div>
+      <p class="form-error" id="aiError" role="alert" hidden></p>
+      <div id="aiLoading" class="ai-loading" hidden><span class="spinner"></span><strong>正在整理结构建议…</strong><span>可随时取消，当前草稿不会改变。</span></div>
+      <div id="aiResult" hidden><div class="section-heading"><h3 id="aiResultTitle">建议方案</h3><span class="preview-badge">待确认</span></div><div id="aiResultContent"></div><p class="help">已有内容会保留，仅补充未存在的实体和关系；同名实体的现有属性优先。</p></div>
+    </div><footer class="dialog-footer"><button class="btn" id="cancelAI">取消</button><button class="btn primary" id="generateAI">生成建议</button><button class="btn primary" id="applyAI" hidden>加入当前草稿</button></footer></div>
+  </dialog>
+
+  <dialog class="history-drawer" id="historyDialog" aria-labelledby="historyTitle">
+    <div class="dialog-layout"><header class="dialog-header"><h2 id="historyTitle">审核历史</h2><button class="close" data-close-dialog="historyDialog" aria-label="关闭审核历史">×</button></header><div class="dialog-body">
+      <div class="history-filters"><select id="historyType" aria-label="申请类型"><option value="all">全部申请类型</option><option>首次发布</option><option>版本更新</option></select><select id="historyStatus" aria-label="审核状态"><option value="all">全部审核状态</option><option value="pending">审核中</option><option value="approved">已通过</option><option value="rejected">已驳回</option><option value="withdrawn">已撤回</option></select><button class="btn" id="resetHistory">重置</button></div>
+      <div id="reviewHistory" aria-live="polite"></div>
+      <div class="review-demo" id="reviewDemo" hidden><strong>审核结果演示</strong><p>以下按钮仅用于体验审核结果；正式审核由审核人员处理。</p><div><button class="btn" id="demoReject">演示驳回</button><button class="btn primary" id="demoApprove">演示审核通过</button></div></div>
+    </div><footer class="dialog-footer"><span class="help" id="historyCount"></span><button class="btn" data-close-dialog="historyDialog">关闭</button></footer></div>
+  </dialog>
+  <dialog class="publish-dialog" id="publishDialog" aria-labelledby="publishTitle"><header class="dialog-header"><h2 id="publishTitle">提交发布审核</h2><button class="close" data-close-dialog="publishDialog" aria-label="关闭发布审核确认">×</button></header><div class="dialog-body"><p id="publishSummary"></p><dl class="publish-facts" id="publishFacts"></dl><p class="notice" id="publishImpact"></p></div><footer class="dialog-footer"><button class="btn" data-close-dialog="publishDialog">取消</button><button class="btn primary" id="confirmPublish">确认提交</button></footer></dialog>
+  <dialog class="publish-dialog" id="rejectDialog" aria-labelledby="rejectTitle"><form id="rejectForm"><header class="dialog-header"><h2 id="rejectTitle">演示审核驳回</h2><button type="button" class="close" data-close-dialog="rejectDialog" aria-label="关闭驳回演示">×</button></header><div class="dialog-body"><label class="stack-label" for="rejectReason"><span class="required">*</span>驳回理由</label><textarea id="rejectReason" maxlength="200" rows="3" placeholder="说明需要调整的实体、关系或属性"></textarea><p class="form-error" id="rejectError" role="alert" hidden></p></div><footer class="dialog-footer"><button class="btn" type="button" data-close-dialog="rejectDialog">取消</button><button class="btn danger-fill" type="submit">确认驳回（演示）</button></footer></form></dialog>
+  <dialog class="confirm-dialog" id="leaveDialog" aria-labelledby="leaveTitle"><header class="dialog-header"><h2 id="leaveTitle">有未保存的修改</h2></header><div class="dialog-body"><p>是否保存本次编辑再离开？不保存将恢复最近一次保存的草稿。</p></div><footer class="dialog-footer"><button class="btn" id="stayEditing">继续编辑</button><button class="btn" id="discardAndLeave">不保存离开</button><button class="btn primary" id="saveAndLeave">保存并离开</button></footer></dialog>
+  <dialog class="property-dialog" id="propertyDialog" aria-labelledby="propertyTitle">
+    <form class="dialog-layout" id="propertyForm" novalidate>
+      <header class="dialog-header"><h2 id="propertyTitle">属性设置</h2><button class="close" type="button" id="closeProperties" aria-label="关闭属性设置">×</button></header>
+      <div class="dialog-body"><p class="help" id="propertyDescriptionHelp" style="margin:0 0 16px">定义需要记录的信息，例如名称、数量或日期。可补充属性含义和填写示例，帮助理解与抽取；说明与示例选填，最多 500 字。</p><p class="form-error" id="propertyError" role="alert" hidden></p><div class="property-row row-head" aria-hidden="true"><span>属性名称</span><span>数据类型</span><span>必填</span><span>说明与示例（选填）</span><span>操作</span></div><div id="propertyRows"></div><p class="help" id="propertyEmpty">暂无属性，可按需要添加。</p><button type="button" class="btn small dashed section-add" id="addProperty">＋ 添加属性</button></div>
+      <footer class="dialog-footer"><button type="button" class="btn" id="cancelProperties">取消</button><button class="btn primary" type="submit">确定</button></footer>
+    </form>
+  </dialog>
+  <dialog class="confirm-dialog" id="confirmDialog" aria-labelledby="confirmTitle">
+    <div class="dialog-header"><h2 id="confirmTitle">确认操作</h2><button class="close" id="closeConfirm" type="button" aria-label="关闭确认">×</button></div>
+    <div class="dialog-body"><p id="confirmText"></p></div>
+    <div class="dialog-footer"><button class="btn" id="cancelConfirm" type="button">取消</button><button class="btn primary" id="acceptConfirm" type="button">确定</button></div>
+  </dialog>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <div class="prototype-load-notice" id="prototypeLoadNotice" role="status"><div><strong id="prototypeLoadTitle">正在加载页面内容</strong><p id="prototypeLoadHint">请稍候；若长时间未显示，可重新加载。</p></div><a class="btn" id="prototypeReload" href="index.html?revision=41">重新加载</a></div>
+  <script src="prototype-load.js?v=41"></script>
+  <script src="ontology-state.js?v=36"></script>
+  <script src="extraction-state.js?v=36"></script>
+  <script src="results-state.js?v=36"></script>
+  <script src="terminology.js?v=36"></script>
+  <script src="graph-preview.js?v=36"></script>
+  <script src="ontology-editor.js?v=36"></script>
+  <script src="ontology-ai.js?v=36"></script>
+  <script src="ontology-review.js?v=36"></script>
+  <script src="extraction-wizard.js?v=36"></script>
+  <script src="extraction-ui.js?v=39"></script>
+  <script src="results-ui.js?v=36"></script>
+  <script src="fusion.js?v=39"></script>
+  <script src="fusion-task.js?v=39"></script>
+  <script src="quality.js?v=39"></script>
+  <script src="quality-actions.js?v=36"></script>
+  <script src="graph-catalog.js?v=40"></script>
+  <script src="fusion-examples.js?v=39"></script>
+  <script src="party-learning-example.js?v=41"></script>
+  <script src="scenario-data.js?v=41"></script>
+  <script src="application-state.js?v=41"></script>
+  <script src="application-explorer.js?v=36"></script>
+  <script src="application-ui.js?v=36"></script>
+  <script src="ontology-app.js?v=36"></script>
+  <script src="notification-data.js?v=41"></script>
+  <script src="notification-target.js?v=36"></script>
+  <script src="notification-center.js?v=36"></script>
+</body>
+</html>

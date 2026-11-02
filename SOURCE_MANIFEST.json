@@ -1,0 +1,267 @@
+{
+  "source_commit": "1de22611df44322d7930c7287943650f85c8743a",
+  "kind": "static-product-prototype",
+  "source_files": 48,
+  "files": [
+    {
+      "path": "knowledge-graph/admin-graph-review.css",
+      "bytes": 9830,
+      "sha": "9714f0c09b8418f8aae39ec0d85067d39f7bd484"
+    },
+    {
+      "path": "knowledge-graph/admin-graph-review.js",
+      "bytes": 31866,
+      "sha": "cee74be04642ee826848c3d8bce24a53e29edce7"
+    },
+    {
+      "path": "knowledge-graph/application-explorer.css",
+      "bytes": 6617,
+      "sha": "c3647baeaec7dc71b5c422c2bf2e08245a07a011"
+    },
+    {
+      "path": "knowledge-graph/application-explorer.js",
+      "bytes": 25599,
+      "sha": "22bed78d5105c534c0012d26512980cc80ce6332"
+    },
+    {
+      "path": "knowledge-graph/application-state.js",
+      "bytes": 12886,
+      "sha": "80dfede48c02cb95529550810432d855ba95d807"
+    },
+    {
+      "path": "knowledge-graph/application-ui.js",
+      "bytes": 14240,
+      "sha": "efa5dea9d93d04ce6c49f5afb0464513f296229b"
+    },
+    {
+      "path": "knowledge-graph/application.css",
+      "bytes": 1881,
+      "sha": "08fa772a264e25a957cd9a72701f91c2419c2244"
+    },
+    {
+      "path": "knowledge-graph/extraction-state.js",
+      "bytes": 27953,
+      "sha": "0cf752640e1f95121e566f0a4d96c5236ffb37d4"
+    },
+    {
+      "path": "knowledge-graph/extraction-ui.js",
+      "bytes": 17303,
+      "sha": "42841152a8941ee2aa2c6ed613cdc986a792e9dc"
+    },
+    {
+      "path": "knowledge-graph/extraction-wizard.js",
+      "bytes": 24773,
+      "sha": "e0c8c3aafe12a42401e81f03b921695f636b3b65"
+    },
+    {
+      "path": "knowledge-graph/extraction.css",
+      "bytes": 19748,
+      "sha": "8930c949e4983b4e2a343c64fdce8f36daab1c08"
+    },
+    {
+      "path": "knowledge-graph/fusion-examples.js",
+      "bytes": 11519,
+      "sha": "18b0176a63d3e90f39d1215355371f6c86569974"
+    },
+    {
+      "path": "knowledge-graph/fusion-task.css",
+      "bytes": 3108,
+      "sha": "1a1ca0a2b7cf9a2170a23373b36ef4ca8772e489"
+    },
+    {
+      "path": "knowledge-graph/fusion-task.js",
+      "bytes": 22165,
+      "sha": "097d1523650ccaa26abab9c2606d313bc09c28af"
+    },
+    {
+      "path": "knowledge-graph/fusion.css",
+      "bytes": 9517,
+      "sha": "1a93ec0b0501e87b9a58c32e63880c1b9b511f0f"
+    },
+    {
+      "path": "knowledge-graph/fusion.js",
+      "bytes": 46119,
+      "sha": "8f9d10d57a0b53da454056043517d329c427c859"
+    },
+    {
+      "path": "knowledge-graph/graph-catalog.css",
+      "bytes": 4523,
+      "sha": "8f058a288400ce002400d0e467fcc9d4cf981666"
+    },
+    {
+      "path": "knowledge-graph/graph-catalog.js",
+      "bytes": 22986,
+      "sha": "6fcdcb87248170a0e7d38f8f59a523ee12129c49"
+    },
+    {
+      "path": "knowledge-graph/graph-preview.js",
+      "bytes": 17661,
+      "sha": "a37eb61da9d28ee31ac7f1ffb4aade23cb88faae"
+    },
+    {
+      "path": "knowledge-graph/index.html",
+      "bytes": 40640,
+      "sha": "6139f928e67f3b3e6aecef02cb997e0dd5d18421"
+    },
+    {
+      "path": "knowledge-graph/notification-center.css",
+      "bytes": 5475,
+      "sha": "8a141eac2c5e204a1cd4bc807102ba0cf328f6ee"
+    },
+    {
+      "path": "knowledge-graph/notification-center.js",
+      "bytes": 10341,
+      "sha": "61940a6e15b230632e729f958cadb0d800ac816e"
+    },
+    {
+      "path": "knowledge-graph/notification-data.js",
+      "bytes": 5009,
+      "sha": "a4f64d0e39e361b4f20d985b9b2e29eda6f43a47"
+    },
+    {
+      "path": "knowledge-graph/notification-target.js",
+      "bytes": 6591,
+      "sha": "a982505ef120b03e82e62b56168f886dba18dbcb"
+    },
+    {
+      "path": "knowledge-graph/ontology-ai.js",
+      "bytes": 7899,
+      "sha": "e975afce71ff3e5212371739a7a4764ee745ff94"
+    },
+    {
+      "path": "knowledge-graph/ontology-app.js",
+      "bytes": 20590,
+      "sha": "8fcd827efc30d338481240a33aa832a954143309"
+    },
+    {
+      "path": "knowledge-graph/ontology-editor.css",
+      "bytes": 15281,
+      "sha": "285c2b516f8164fcc14f6cdacf7ac0013174ed79"
+    },
+    {
+      "path": "knowledge-graph/ontology-editor.js",
+      "bytes": 21173,
+      "sha": "ec231b516849dffd4cd02418a46578ca3f33b4a2"
+    },
+    {
+      "path": "knowledge-graph/ontology-review.js",
+      "bytes": 7921,
+      "sha": "cd0573267aba6c05dc16e7ecf58fce884987109a"
+    },
+    {
+      "path": "knowledge-graph/ontology-state.js",
+      "bytes": 14866,
+      "sha": "97a9239ab796dd1357f1058b1570427148031ed8"
+    },
+    {
+      "path": "knowledge-graph/party-learning-example.js",
+      "bytes": 10120,
+      "sha": "363c7ab7c49483eb31f7972dc1abbd81584c9257"
+    },
+    {
+      "path": "knowledge-graph/prototype-load.js",
+      "bytes": 1385,
+      "sha": "0e2cb11fffc7e74dad59b1dc70b2b67126190485"
+    },
+    {
+      "path": "knowledge-graph/qa-evidence.css",
+      "bytes": 6920,
+      "sha": "4a93bfda05397503cdeeb0772b19b6c20ed3b1a4"
+    },
+    {
+      "path": "knowledge-graph/qa-evidence.js",
+      "bytes": 14468,
+      "sha": "61d77860dd40c16fbbb4f8415148baafdd781433"
+    },
+    {
+      "path": "knowledge-graph/qa.css",
+      "bytes": 7269,
+      "sha": "ac9aa64b1ce8a6f4df35cc61ecdc9b6b487bebae"
+    },
+    {
+      "path": "knowledge-graph/qa.js",
+      "bytes": 19827,
+      "sha": "8d02d9509c469151247f09b57d909543c267b608"
+    },
+    {
+      "path": "knowledge-graph/quality-actions.js",
+      "bytes": 12128,
+      "sha": "85eba8e9ffb7704f72869838f06085c006c10e33"
+    },
+    {
+      "path": "knowledge-graph/quality.css",
+      "bytes": 9968,
+      "sha": "618b8c2e668d7a2078c0c269b7f5519159d438af"
+    },
+    {
+      "path": "knowledge-graph/quality.js",
+      "bytes": 56341,
+      "sha": "408177e35c502ef14f99adc723cd5793883a3b4c"
+    },
+    {
+      "path": "knowledge-graph/results-state.js",
+      "bytes": 7337,
+      "sha": "a542fad20387c9e5577cfeb910dfb339ded282b7"
+    },
+    {
+      "path": "knowledge-graph/results-ui.js",
+      "bytes": 23361,
+      "sha": "9f7ec541e282752ac8ec11c17646dcead6a660b6"
+    },
+    {
+      "path": "knowledge-graph/results.css",
+      "bytes": 11564,
+      "sha": "c4c902537edbef40cd2897991247b30c2d654901"
+    },
+    {
+      "path": "knowledge-graph/scenario-data.js",
+      "bytes": 18904,
+      "sha": "a50f09584a3f7d80cbb7510c6d840e65e1d9efaf"
+    },
+    {
+      "path": "knowledge-graph/terminology.css",
+      "bytes": 2455,
+      "sha": "b9d83bb846d018de39049b7673cdcd089267077d"
+    },
+    {
+      "path": "knowledge-graph/terminology.js",
+      "bytes": 15287,
+      "sha": "9da9ef3e447f605798b24e8b32cff2b90d2d03e2"
+    },
+    {
+      "path": "agent-v1.html",
+      "bytes": 99881,
+      "sha": "6cb280da11418dceb66a75053c98bbc6eb9735b6"
+    },
+    {
+      "path": "manage-console-publish-review.html",
+      "bytes": 39685,
+      "sha": "f89a6c41d97ea1b36b23f907d363a01e21aa5529"
+    },
+    {
+      "path": "v122-ai-entry-architecture.html",
+      "bytes": 56913,
+      "sha": "50fc8fa0c774368c35f6da4a5980134ba63531a3"
+    },
+    {
+      "path": "index.html",
+      "bytes": 605,
+      "sha": "aeecf93ba8be2f59dece4e8c2151b0eaa2720d07"
+    },
+    {
+      "path": ".nojekyll",
+      "bytes": 0,
+      "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "workflow-menu.html",
+      "bytes": 1232,
+      "sha": "cb74ce7c26b35af691a3e3f8693c93d53fcf2397"
+    },
+    {
+      "path": "manage-console-workflow-management.html",
+      "bytes": 1232,
+      "sha": "cb74ce7c26b35af691a3e3f8693c93d53fcf2397"
+    }
+  ]
+}

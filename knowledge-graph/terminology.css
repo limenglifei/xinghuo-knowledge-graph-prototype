@@ -1,0 +1,29 @@
+/* 术语库沿用知识库卡片与表单密度，所有扩展仅限当前页面。 */
+#termsSearch { width:300px; }
+#termsStatus { width:130px; }
+.term-card .card-footer { gap:13px; flex-wrap:wrap; }
+.term-card .card-footer button:focus-visible { outline:2px solid var(--blue); outline-offset:2px; border-radius:3px; }
+.term-card { cursor:pointer; }
+.term-card:focus-visible { outline:2px solid var(--blue); outline-offset:3px; border-color:var(--blue); }
+.term-head-actions { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+#termsHeading:focus { outline:none; }
+#terminologyPage .page-head > div:first-child { min-width:0; }
+#termsHeading,#termsDescription { overflow-wrap:anywhere; }
+.term-card .card-heading { gap:8px; }
+.term-card .created { margin-bottom:0; }
+.term-back { margin-bottom:16px; }
+.term-table-wrap { border:1px solid var(--line); border-radius:7px; overflow:auto; }
+.term-table { border-collapse:collapse; width:100%; table-layout:fixed; font-size:13px; }
+.term-table th,.term-table td { padding:15px; text-align:left; border-bottom:1px solid var(--line); vertical-align:top; overflow-wrap:anywhere; }
+.term-table th { font-weight:500; color:var(--muted); background:#f8f9fc; }
+.term-table tr:last-child td { border-bottom:0; }
+.term-table th:nth-child(1) { width:19%; }.term-table th:nth-child(2) { width:23%; }.term-table th:nth-child(3) { width:30%; }.term-table th:nth-child(4) { width:11%; }.term-table th:nth-child(5) { width:17%; }
+.term-table strong { font-weight:500; }.term-table .link-btn { margin-right:9px; font-size:12px; }
+.term-alias { display:inline-block; margin:0 5px 5px 0; padding:2px 7px; border-radius:4px; background:#f3f5f9; color:#62718a; font-size:12px; }
+.term-pagination { display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:20px; color:var(--muted); font-size:12px; }
+.term-editor { width:min(580px,calc(100vw - 64px)); }
+.term-field { display:flex; flex-direction:column; gap:7px; margin-bottom:20px; font-size:13px; }
+.term-field .required { font-style:normal; }
+.term-check { display:flex; align-items:center; gap:8px; font-size:13px; }
+.term-disabled-note { color:#98702e; background:#fff9ec; border:1px solid #f1dbac; padding:10px 14px; border-radius:6px; margin:20px 0 0; font-size:13px; }
+@media(max-width:1300px) { .term-table th,.term-table td { padding:12px 10px; }.term-table th:nth-child(3) { width:27%; }.term-table th:nth-child(5) { width:20%; } }

@@ -1,0 +1,61 @@
+/* 三个图谱业务入口共用现有本体卡片语言，详情仍使用各自的业务工作区。 */
+.gc-module-desc { margin:16px 0 0; font-size:13px; color:var(--muted); white-space:pre-line; line-height:1.8; }
+.gc-toolbar { display:flex; align-items:center; gap:12px; padding:22px 0 18px; }
+.gc-toolbar input[type=search] { width:280px; }
+.gc-toolbar select { width:150px; }
+.gc-toolbar-actions { display:flex; align-items:center; gap:10px; margin-left:auto; }
+.gc-toolbar[data-catalog-form="quality"] { flex-wrap:wrap; }
+.gc-filter-label { display:flex; align-items:center; gap:8px; white-space:nowrap; font-size:13px; }
+.gc-toolbar .gc-filter-label select { width:120px; }
+.gc-list-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:18px; }
+.gc-list-head h2 { margin:0; font-size:15px; font-weight:600; }
+.gc-list-head span { font-size:12px; color:var(--muted); font-weight:400; margin-left:6px; }
+.gc-list-head p { font-size:12px; color:var(--muted); margin:0; }
+.gc-card { display:flex; flex-direction:column; cursor:pointer; text-align:left; }
+.gc-card:focus-visible { outline:2px solid var(--blue); outline-offset:3px; }
+#ontologyCards > .ontology-card[tabindex] { cursor:pointer; }
+#ontologyCards > .ontology-card[tabindex]:focus-visible { outline:2px solid var(--blue); outline-offset:3px; }
+.gc-card .card-main { flex:1; }
+.gc-card .card-heading { gap:9px; }
+.gc-card .card-title { font-size:16px; }
+.gc-card .card-desc { margin-bottom:16px; }
+.gc-publish-summary { display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; margin:-2px 0 17px; color:var(--muted); font-size:12px; }
+.gc-publish-summary > div { display:flex; align-items:center; gap:4px; }
+.gc-publish-summary .status { margin-left:0; }
+.gc-publish-summary small { flex-basis:100%; font-size:12px; line-height:1.5; }
+.gc-metrics { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:17px 20px; margin:0; }
+.gc-extraction-card .gc-metrics,.gc-fusion-card .gc-metrics,.gc-quality-card .gc-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.gc-metrics div { min-width:0; }
+.gc-metrics dt { color:var(--muted); font-size:12px; margin-bottom:5px; }
+.gc-metrics dd { font-size:23px; font-weight:600; color:#34415b; line-height:1.3; margin:0; }
+.gc-metrics .gc-attention { color:#ae7a2b; }
+.gc-extraction-card .gc-attention,.gc-fusion-card .gc-attention { color:#d97706; font-weight:700; }
+.gc-quality-card .gc-score { color:var(--blue); font-weight:700; }
+.gc-quality-card .gc-issues { color:#d97706; font-weight:700; }
+.gc-card-footer { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; border-top:1px solid var(--line); font-size:12px; gap:12px; }
+.gc-card-footer span:first-child { color:var(--muted); min-width:0; overflow-wrap:anywhere; }
+.gc-card-footer span:last-child { color:var(--blue); flex-shrink:0; }
+.gc-count-note { margin:18px 0; font-size:12px; color:var(--muted); line-height:1.8; }
+.gc-pagination { display:flex; justify-content:flex-end; align-items:center; gap:10px; margin:20px 0; font-size:12px; color:var(--muted); }
+.gc-detail-head { display:flex; align-items:center; gap:16px; padding:22px 0 18px; border-bottom:1px solid var(--line); }
+.gc-detail-head .btn { flex-shrink:0; }
+.gc-detail-head > div { min-width:0; flex:1; }
+.gc-detail-head h2 { margin:0; font-size:18px; font-weight:600; overflow-wrap:anywhere; }
+.gc-detail-head p { color:var(--muted); margin:5px 0 0; font-size:12px; }
+.gc-detail-head h2:focus { outline:none; }
+.gc-section-label { font-size:14px; font-weight:600; }
+.gc-unavailable { margin-top:20px; }
+.gc-disabled-publication { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:12px; }
+.gc-state { display:inline-block; margin-left:auto; flex-shrink:0; padding:2px 7px; border-radius:4px; font-size:12px; color:var(--green); background:#edf8f3; white-space:nowrap; }
+.gc-state.muted { color:var(--muted); background:#f1f3f6; }
+.gc-state.warning { color:#a9782a; background:#fff6e7; }
+.gc-state.running { color:var(--blue); background:#edf3ff; }
+.gc-modeling-filters { flex-wrap:wrap; }
+.gc-modeling-filters label { display:flex; align-items:center; gap:8px; white-space:nowrap; font-size:13px; }
+.gc-modeling-filters select { width:142px; }
+.gc-modeling-filters .result-count { white-space:nowrap; }
+@media(max-width:1300px) {
+  .gc-toolbar { gap:10px; flex-wrap:wrap; }
+  .gc-toolbar input[type=search] { width:240px; }
+  .gc-list-head { align-items:flex-start; }
+}

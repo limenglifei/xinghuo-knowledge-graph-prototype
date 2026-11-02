@@ -1,0 +1,72 @@
+/* 图谱应用沿用报告区的按钮、边框与信息密度，仅影响 ga- 命名区域。 */
+.ga-explorer { min-width:0; color:var(--text); }
+.ga-query { display:flex; align-items:flex-end; flex-wrap:wrap; gap:10px; margin:0; }
+.ga-query > label { display:flex; flex-direction:column; gap:7px; font-size:12px; color:var(--muted); min-width:0; }
+.ga-query select { width:155px; font-size:13px; }
+.ga-query .ga-keyword { flex:1; min-width:180px; max-width:290px; }
+.ga-query input { font-size:13px; }
+.ga-query .btn { white-space:nowrap; }
+.ga-query .ga-export { margin-left:auto; }
+.ga-query-note { color:var(--muted); font-size:12px; margin:12px 0 18px; line-height:1.7; }
+.ga-workspace { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:16px; min-width:0; }
+.ga-graph { min-width:0; border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+.ga-graph > header { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:14px 16px; border-bottom:1px solid var(--line); }
+.ga-graph h3,.ga-sidebar h3 { margin:0; font-size:14px; font-weight:600; }
+.ga-graph header p { margin:5px 0 0; color:var(--muted); font-size:12px; }
+.ga-view-actions { display:flex; align-items:center; gap:6px; }
+.ga-view-actions > span { min-width:40px; font-size:12px; color:var(--muted); text-align:center; }
+.ga-board { height:460px; position:relative; overflow:hidden; background:#fbfcfe; }
+.ga-board svg { display:block; width:100%; height:100%; cursor:grab; touch-action:none; user-select:none; }
+.ga-board svg:active { cursor:grabbing; }
+.ga-edge path { fill:none; stroke:#a5b6d1; stroke-width:1.5; }
+.ga-edge text { fill:#71809a; font-size:12px; stroke:#fbfcfe; stroke-width:5px; paint-order:stroke; }
+.ga-node { cursor:pointer; outline:none; }
+.ga-node > circle:first-of-type { stroke-width:1.8; }
+.ga-node.ga-selected > circle:first-of-type,.ga-node:focus-visible > circle:first-of-type { stroke:var(--blue); stroke-width:4; }
+.ga-node.ga-issue-focus > circle:first-of-type { stroke:#d78335; stroke-width:3; }
+.ga-edge.ga-issue-focus path { stroke:#d78335; stroke-width:2.5; }
+.ga-table .ga-issue-row td { background:#fffbf3; }
+.ga-node text { font-size:13px; pointer-events:none; }
+.ga-node .ga-node-name { fill:#41536e; stroke:#fbfcfe; stroke-width:4px; paint-order:stroke; }
+.ga-graph > footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; padding:10px 16px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); }
+.ga-graph > footer .link-btn { font-size:12px; }
+.ga-empty { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:25px; text-align:center; }
+.ga-empty[hidden] { display:none; }
+.ga-empty strong { font-size:14px; font-weight:500; }
+.ga-empty p { font-size:12px; color:var(--muted); line-height:1.7; }
+.ga-sidebar { min-width:0; max-height:590px; overflow:auto; padding:16px; border:1px solid var(--line); border-radius:7px; }
+.ga-sidebar h3 { overflow-wrap:anywhere; }
+.ga-sidebar h4 { font-size:13px; font-weight:500; margin:20px 0 10px; }
+.ga-hint { color:var(--muted); font-size:13px; line-height:1.8; margin:15px 0; }
+.ga-facts,.ga-properties { display:grid; grid-template-columns:70px minmax(0,1fr); gap:8px 10px; font-size:12px; margin:14px 0; }
+.ga-facts dt,.ga-properties dt { color:var(--muted); overflow-wrap:anywhere; }
+.ga-facts dd,.ga-properties dd { margin:0; overflow-wrap:anywhere; line-height:1.7; }
+.ga-explore-controls { border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding-bottom:12px; }
+.ga-explore-controls > div { display:flex; gap:9px; margin-bottom:12px; }
+.ga-explore-controls label { flex:1; min-width:0; display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--muted); }
+.ga-explore-controls select { font-size:12px; }
+.ga-explore-controls p { font-size:12px; line-height:1.7; color:var(--muted); margin:9px 0 0; }
+.ga-explore-controls > .btn { width:100%; font-size:13px; }
+.ga-source { padding:10px 0; border-bottom:1px solid var(--line); }
+.ga-source strong { display:block; font-size:12px; font-weight:500; color:#577299; overflow-wrap:anywhere; }
+.ga-source small { display:block; color:var(--muted); font-size:11px; margin:5px 0; }
+.ga-source blockquote { font-size:12px; color:var(--muted); line-height:1.8; margin:8px 0 0; padding-left:9px; border-left:2px solid var(--line); overflow-wrap:anywhere; }
+.ga-scope { font-size:12px; color:var(--muted); margin:14px 0; line-height:1.7; }
+.ga-results { min-width:0; border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+.ga-results > header { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:0 16px; border-bottom:1px solid var(--line); }
+.ga-results nav { display:flex; gap:22px; }
+.ga-results nav button { padding:14px 0; border:0; border-bottom:2px solid transparent; background:transparent; color:var(--muted); font-size:13px; }
+.ga-results nav button.active { color:var(--blue); border-bottom-color:var(--blue); }
+.ga-results header > span { font-size:12px; color:var(--muted); }
+.ga-table-wrap { max-width:100%; max-height:350px; overflow:auto; }
+.ga-table { width:100%; min-width:730px; border-collapse:collapse; table-layout:fixed; font-size:12px; }
+.ga-table th,.ga-table td { padding:12px 14px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line); line-height:1.8; overflow-wrap:anywhere; }
+.ga-table th { position:sticky; top:0; background:#f8f9fc; color:var(--muted); font-weight:500; z-index:1; }
+.ga-table th:nth-child(1) { width:19%; }.ga-table th:nth-child(2) { width:22%; }.ga-table th:nth-child(3) { width:10%; }.ga-table th:nth-child(4) { width:25%; }.ga-table th:nth-child(5) { width:24%; }
+.ga-table .link-btn { padding:0; font-size:12px; line-height:1.8; text-align:left; white-space:normal; overflow-wrap:anywhere; }
+.ga-direction-arrow { color:var(--muted); }
+.ga-table-empty { text-align:center; padding:30px; color:var(--muted); font-size:13px; }
+.ga-message { font-size:12px; color:var(--green); line-height:1.7; margin:12px 0 0; }
+.ga-message.warning { color:#a66e26; }
+.ga-warning { font-size:12px; line-height:1.8; color:#98702e; background:#fff9ec; border:1px solid #f1dbac; border-radius:6px; padding:9px 12px; margin:0 0 16px; }
+@media (max-width:1300px) { .ga-workspace { grid-template-columns:minmax(0,1fr) 280px; gap:12px; }.ga-graph > header { padding:12px; }.ga-graph > footer { padding:10px 12px; }.ga-view-actions { gap:4px; }.ga-query select { width:140px; }.ga-board { height:440px; } }

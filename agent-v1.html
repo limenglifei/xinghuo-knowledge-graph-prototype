@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智能体 V1 交互原型</title>
+  <style>
+    :root {
+      --primary: #2f68e8;
+      --primary-hover: #2457c5;
+      --text: #1f2430;
+      --muted: #7f8a9d;
+      --border: #e5e9f2;
+      --soft: #f7f8fc;
+      --success: #18a058;
+      --warning: #d48806;
+      --danger: #ef3f39;
+      --shadow: 0 10px 28px rgba(28, 43, 72, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: #eef1f6;
+      font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .55; }
+
+    .prototype-bar {
+      height: 58px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 18px;
+      background: #172033;
+      color: #fff;
+    }
+    .prototype-title { min-width: 164px; font-size: 15px; font-weight: 700; }
+    .scenario-tabs { display: flex; min-width: 0; gap: 4px; overflow-x: auto; }
+    .scenario-btn {
+      height: 32px;
+      flex: 0 0 auto;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: #aeb9cc;
+    }
+    .scenario-btn:hover { color: #fff; background: rgba(255,255,255,.08); }
+    .scenario-btn.active { color: #fff; background: var(--primary); }
+    .prototype-state { margin-left: auto; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .prototype-state select { height: 30px; border: 1px solid #445068; border-radius: 6px; background: #202b40; color: #fff; }
+
+    #app { height: calc(100% - 58px); min-height: 620px; }
+    .screen { display: none; height: 100%; }
+    .screen.active { display: block; }
+    .shell { height: 100%; display: grid; grid-template-columns: 210px minmax(0, 1fr); background: #fff; }
+    .sidebar { min-width: 0; background: #f7f8fc; border-right: 1px solid #e0e2e9; }
+    .brand { height: 62px; display: flex; align-items: center; gap: 10px; padding: 0 20px; font-weight: 700; }
+    .brand-mark { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 7px; background: var(--primary); color: #fff; font-size: 13px; }
+    .menu { padding: 6px 12px; }
+    .menu-item {
+      position: relative;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 6px 0;
+      padding: 0 12px;
+      border-radius: 8px;
+      color: #242939;
+    }
+    .menu-item:hover { background: rgba(0,109,255,.07); }
+    .menu-item.active { background: #fff; color: #006dff; font-weight: 600; }
+    .menu-item.active::before { position: absolute; left: -12px; width: 3px; height: 22px; border-radius: 0 2px 2px 0; background: #006dff; content: ""; }
+    .menu-icon { width: 20px; text-align: center; color: currentColor; }
+    .shell-main { min-width: 0; display: grid; grid-template-rows: 62px minmax(0, 1fr); overflow: hidden; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 22px; border-bottom: 1px solid #edf0f5; background: #fff; }
+    .breadcrumb { display: flex; align-items: center; gap: 8px; color: #667085; }
+    .top-actions { display: flex; align-items: center; gap: 12px; }
+    .history-btn { height: 32px; padding: 0 14px; border: 0; border-radius: 8px; background: #edf4ff; color: var(--primary); }
+    .avatar { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: #dce7ff; color: var(--primary); font-weight: 700; }
+    .page { position: relative; min-width: 0; min-height: 0; overflow: auto; background: #fff; }
+    .page-pad { min-height: 100%; padding: 20px clamp(28px, 6vw, 120px) 18px; }
+    .admin-page { height: 100%; min-height: 0; padding: 16px 20px 20px; display: flex; flex-direction: column; overflow: hidden; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 16px; font-size: 20px; line-height: 30px; }
+    h2 { font-size: 18px; }
+    h3 { font-size: 15px; }
+    .subtle { color: var(--muted); }
+    .small { font-size: 12px; }
+
+    .btn { height: 32px; padding: 0 14px; border: 1px solid #d9dfe9; border-radius: 8px; background: #fff; color: #344054; }
+    .btn:hover { border-color: var(--primary); color: var(--primary); }
+    .btn.primary { border-color: var(--primary); background: var(--primary); color: #fff; }
+    .btn.primary:hover { background: var(--primary-hover); }
+    .btn.link { height: auto; padding: 0; border: 0; background: transparent; color: var(--primary); }
+    .btn.danger { color: var(--danger); }
+    .btn.icon { width: 30px; padding: 0; }
+    .tag { display: inline-flex; align-items: center; min-height: 22px; padding: 1px 8px; border-radius: 4px; background: #edf4ff; color: var(--primary); font-size: 12px; white-space: nowrap; }
+    .tag.success { background: #e8f8ef; color: var(--success); }
+    .tag.warning { background: #fff7e6; color: var(--warning); }
+    .tag.danger { background: #fff1f0; color: var(--danger); }
+    .tag.gray { background: #f2f4f7; color: #667085; }
+    .field, .select, .textarea {
+      width: 100%;
+      border: 1px solid #d9dfe9;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+    .field, .select { height: 34px; padding: 0 10px; }
+    .textarea { min-height: 92px; padding: 9px 10px; resize: vertical; }
+    .field:focus, .select:focus, .textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(47,104,232,.1); }
+    .form-item { display: grid; gap: 7px; margin-bottom: 16px; }
+    .form-label { color: #344054; font-size: 13px; font-weight: 600; }
+    .required::before { color: var(--danger); content: "*"; margin-right: 4px; }
+    .form-help { color: #8a94a8; font-size: 12px; }
+    .form-error { color: var(--danger); font-size: 12px; }
+    .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .toolbar .field { width: 235px; }
+    .toolbar .select { width: 128px; }
+    .toolbar .spacer { flex: 1; }
+    .tabs { display: flex; gap: 28px; border-bottom: 1px solid #edf0f5; }
+    .tab { position: relative; padding: 0 0 12px; border: 0; background: none; color: #667085; }
+    .tab.active { color: var(--primary); font-weight: 600; }
+    .tab.active::after { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: var(--primary); content: ""; }
+
+    .card-grid { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 20px; padding-top: 8px; }
+    .agent-card { min-width: 0; height: 166px; display: flex; flex-direction: column; padding: 14px 16px 12px; border: 1px solid #e7ecf3; border-radius: 12px; background: #fff; transition: .16s ease; }
+    .agent-card:hover { border-color: rgba(47,104,232,.34); background: #f8fbff; box-shadow: 0 10px 24px rgba(28,43,72,.1); transform: translateY(-1px); }
+    .agent-card-main { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 12px; }
+    .agent-icon { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 12px; background: #edf4ff; color: var(--primary); font-size: 20px; font-weight: 700; }
+    .agent-name { overflow: hidden; margin: 2px 0 6px; font-size: 15px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .agent-desc { display: -webkit-box; overflow: hidden; color: #7b879b; font-size: 12px; line-height: 18px; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+    .agent-card-foot { display: flex; align-items: center; gap: 12px; margin-top: auto; padding-top: 12px; border-top: 1px solid #f0f2f6; }
+    .agent-card-foot .meta { flex: 1; color: #8a94a8; font-size: 12px; }
+    .pagination { display: flex; justify-content: flex-end; gap: 6px; margin-top: 18px; }
+    .page-no { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid #e1e5ec; border-radius: 6px; background: #fff; }
+    .page-no.active { border-color: var(--primary); color: var(--primary); }
+
+    .table-wrap { flex: 1; min-height: 0; overflow: auto; border: 1px solid #edf0f5; border-radius: 8px 8px 0 0; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th { position: sticky; top: 0; z-index: 1; height: 46px; padding: 0 12px; background: #fafbfc; color: #667085; text-align: left; font-size: 13px; font-weight: 600; }
+    td { height: 58px; padding: 9px 12px; border-top: 1px solid #edf0f5; color: #344054; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    tr:hover td { background: #fafcff; }
+    .name-cell { color: #050508; font-weight: 600; }
+    .table-actions { display: flex; gap: 14px; }
+    .admin-tabs { margin-bottom: 12px; }
+    .admin-toolbar { display: flex; gap: 8px; align-items: center; margin: 12px 0 8px; }
+    .admin-toolbar .field { width: 230px; }
+    .admin-toolbar .select { width: 128px; }
+
+    .workflow-editor { height: 100%; position: relative; overflow: hidden; background: #f5f7fb; }
+    .editor-toolbar { height: 54px; display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid #e2e7ef; background: #fff; }
+    .workflow-canvas { position: relative; height: calc(100% - 54px); overflow: hidden; background-color: #f7f8fb; background-image: radial-gradient(#d8dde8 1px, transparent 1px); background-size: 18px 18px; }
+    .node { position: absolute; width: 174px; padding: 12px; border: 1px solid #dfe5ef; border-radius: 10px; background: #fff; box-shadow: 0 4px 12px rgba(32,44,74,.08); }
+    .node strong { display: block; margin-bottom: 6px; }
+    .node.one { left: 12%; top: 30%; }
+    .node.two { left: 39%; top: 22%; }
+    .node.three { left: 39%; top: 48%; }
+    .node.four { left: 67%; top: 34%; }
+    .drawer-mask { position: absolute; inset: 0; display: none; background: rgba(15,23,42,.24); z-index: 20; }
+    .drawer-mask.open { display: block; }
+    .drawer { position: absolute; top: 0; right: 0; bottom: 0; width: min(760px, 82vw); display: flex; flex-direction: column; background: #fff; box-shadow: -8px 0 24px rgba(31,42,68,.14); }
+    .drawer.narrow { width: min(560px, 82vw); }
+    .drawer-head { height: 64px; flex: 0 0 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid #eef2f7; font-size: 16px; font-weight: 600; }
+    .drawer-body { flex: 1; min-height: 0; overflow: auto; padding: 24px; }
+    .drawer-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 24px; border-top: 1px solid #eef2f7; }
+    .close { border: 0; background: none; color: #667085; font-size: 20px; }
+    .version-card { display: flex; gap: 16px; padding: 18px 20px; border: 1px solid #eef2f7; border-radius: 10px; background: #f8fafc; }
+    .version-icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; background: #edf4ff; color: var(--primary); }
+    .section-title { display: flex; align-items: center; justify-content: space-between; margin: 20px 0 10px; font-weight: 600; }
+    .channel-list { display: grid; gap: 8px; }
+    .channel-row { min-height: 62px; display: grid; grid-template-columns: 100px 84px 84px minmax(150px,1fr) 140px; align-items: center; gap: 8px; padding: 10px 16px; border: 1px solid #eef2f7; border-radius: 10px; }
+    .channel-row.header { min-height: 36px; background: #f8fafc; color: #667085; font-size: 12px; font-weight: 600; }
+    .notice { display: flex; gap: 10px; margin-top: 16px; padding: 12px 14px; border: 1px solid #d6e4ff; border-radius: 8px; background: #f5f9ff; color: #475467; font-size: 12px; }
+
+    .builder { height: 100%; display: grid; grid-template-rows: 66px minmax(0,1fr); background: #f5f7fb; }
+    .builder-head { display: flex; align-items: center; gap: 12px; padding: 0 20px; border-bottom: 1px solid #e6eaf1; background: #fff; }
+    .builder-head .status { margin-left: 4px; }
+    .builder-head .spacer { flex: 1; }
+    .builder-identity { min-width: 0; max-width: 360px; display: grid; grid-template-columns: 38px minmax(0,1fr) 30px; align-items: center; gap: 9px; }
+    .builder-identity .agent-icon { width: 38px; height: 38px; border-radius: 9px; font-size: 15px; }
+    .builder-identity-text { min-width: 0; }
+    .builder-identity-name { overflow: hidden; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .builder-identity-desc { overflow: hidden; color: #7f8a9d; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+    .builder-status-group { display: flex; align-items: center; gap: 10px; }
+    .builder-status-item { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .builder-status-label { color: #667085; font-size: 12px; }
+    .builder-body { min-height: 0; display: grid; grid-template-columns: minmax(440px, 44%) minmax(520px, 56%); gap: 0; }
+    .builder-form { min-width: 0; overflow: auto; padding: 16px; border-right: 1px solid #e3e8ef; background: #f7f8fb; }
+    .form-panel { display: grid; gap: 14px; }
+    .config-section { border: 1px solid #e5e9f2; border-radius: 10px; background: #fff; overflow: hidden; }
+    .config-head { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 0 16px; border-bottom: 1px solid #edf0f5; font-weight: 600; }
+    .config-body { padding: 16px; }
+    .publish-summary { display: grid; gap: 10px; }
+    .publish-summary .summary-row { display: flex; align-items: flex-start; gap: 12px; }
+    .publish-summary .summary-label { flex: 0 0 76px; color: #667085; font-size: 12px; }
+    .publish-summary .summary-value { color: #344054; font-size: 13px; }
+    .basic-config { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 14px; }
+    .agent-avatar-edit { display: grid; align-content: start; justify-items: center; gap: 8px; }
+    .agent-avatar-edit .agent-icon { width: 64px; height: 64px; border-radius: 14px; }
+    .agent-avatar-edit .btn { padding: 0 8px; font-size: 12px; }
+    .resource-list { display: grid; gap: 8px; }
+    .resource-row { display: grid; grid-template-columns: 36px minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #e6eaf1; border-radius: 8px; }
+    .resource-symbol { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 7px; background: #f2f5fb; color: var(--primary); }
+    .retrieval-settings { margin-top: 16px; padding-top: 14px; border-top: 1px solid #edf0f5; }
+    .retrieval-title { margin-bottom: 10px; color: #344054; font-size: 13px; font-weight: 600; }
+    .retrieval-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+    .retrieval-grid .form-item { margin-bottom: 0; }
+    .debug-panel { min-width: 0; display: grid; grid-template-rows: 58px minmax(0,1fr) auto; background: #fff; }
+    .debug-head { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid #edf0f5; font-weight: 600; }
+    .debug-messages { min-height: 0; overflow: auto; padding: 16px; background: #fafbfc; }
+    .bubble { max-width: 88%; margin-bottom: 14px; padding: 10px 12px; border-radius: 10px; background: #fff; border: 1px solid #edf0f5; }
+    .bubble.user { margin-left: auto; background: #edf4ff; border-color: #d6e4ff; }
+    .tool-state { margin: 8px 0; padding: 8px 10px; border: 1px solid #e5e9f2; border-radius: 7px; background: #f8fafc; color: #667085; font-size: 12px; }
+    .debug-input { padding: 12px; border-top: 1px solid #edf0f5; }
+    .input-send { display: grid; grid-template-columns: minmax(0,1fr) 36px; gap: 8px; }
+    .send { width: 36px; height: 34px; border: 0; border-radius: 8px; background: var(--primary); color: #fff; }
+
+    .home-content { height: 100%; overflow: auto; padding: 24px 0 40px; }
+    .home-grid { width: min(80%, 1120px); display: grid; gap: 22px; margin: 12px auto 0; }
+    .home-title { text-align: center; font-size: 32px; font-weight: 900; }
+    .home-title span { color: #3f6fff; }
+    .home-input { min-height: 72px; display: grid; grid-template-columns: minmax(0,1fr) 42px; align-items: end; gap: 10px; padding: 14px; border: 1px solid #dce2ec; border-radius: 12px; box-shadow: 0 8px 24px rgba(31,42,68,.07); }
+    .home-input textarea { min-height: 40px; border: 0; outline: none; resize: none; }
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; }
+    .entry-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+    .entry-card { min-height: 58px; display: grid; grid-template-columns: 36px minmax(0,1fr) auto; align-items: center; gap: 12px; padding: 9px 12px; border: 1px solid #e5e9f2; border-radius: 8px; background: #fff; text-align: left; }
+    .entry-card:hover { border-color: rgba(63,111,255,.36); box-shadow: 0 8px 18px rgba(47,104,232,.08); }
+    .entry-icon { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 10px; background: #edf3ff; color: var(--primary); }
+    .entry-card strong { display: block; }
+    .agent-showcase { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+    .home-agent { min-height: 116px; padding: 14px; border: 1px solid #e5e9f2; border-radius: 10px; background: #fff; }
+    .home-agent:hover { border-color: #b8c9f8; background: #fafcff; }
+    .agent-picker { display: none; height: 100%; overflow: auto; padding: 28px 0 40px; }
+    .agent-picker-inner { width: min(80%, 1120px); margin: 0 auto; }
+    .picker-head { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .picker-head div { min-width: 0; }
+    .picker-head h2 { margin: 0 0 2px; }
+    .home-agent-main { display: grid; grid-template-columns: 42px minmax(0,1fr); gap: 12px; align-items: start; }
+    .home-agent-main .agent-icon { width: 42px; height: 42px; border-radius: 10px; font-size: 16px; }
+    .detail-block { margin-top: 18px; }
+    .detail-value { padding: 10px 12px; border: 1px solid #edf0f5; border-radius: 8px; background: #fafbfc; color: #475467; white-space: normal; }
+    .chat-layout { height: 100%; display: none; grid-template-columns: minmax(0,1fr) 360px; }
+    .chat-layout.active { display: grid; }
+    .chat-main { min-width: 0; display: grid; grid-template-rows: 58px minmax(0,1fr) auto; }
+    .chat-head { display: flex; align-items: center; gap: 10px; padding: 0 22px; border-bottom: 1px solid #edf0f5; }
+    .chat-scroll { overflow: auto; padding: 22px max(24px, calc((100% - 760px)/2)); background: #fafbfc; }
+    .chat-compose { padding: 14px max(24px, calc((100% - 760px)/2)); border-top: 1px solid #edf0f5; background: #fff; }
+    .task-panel { padding: 18px; border-left: 1px solid #e2e7ef; background: #fff; }
+    .task-item { display: grid; grid-template-columns: 22px minmax(0,1fr); gap: 8px; margin: 14px 0; }
+    .task-dot { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: #e8f8ef; color: var(--success); font-size: 12px; }
+
+    .modal-mask { position: fixed; inset: 58px 0 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(15,23,42,.38); }
+    .modal-mask.open { display: flex; }
+    .modal { width: min(560px, 92vw); max-height: 86vh; overflow: auto; border-radius: 10px; background: #fff; box-shadow: var(--shadow); }
+    .modal.wide { width: min(760px, 92vw); }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid #edf0f5; font-size: 16px; font-weight: 600; }
+    .modal-body { padding: 20px 22px; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 22px; border-top: 1px solid #edf0f5; }
+    .org-tree { border: 1px solid #e5e9f2; border-radius: 8px; padding: 10px 12px; }
+    .tree-row { min-height: 34px; display: flex; align-items: center; gap: 8px; }
+    .tree-row.indent { padding-left: 26px; }
+    .choice-list { display: grid; gap: 8px; }
+    .choice { display: grid; grid-template-columns: 22px 38px minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 11px; border: 1px solid #e5e9f2; border-radius: 8px; }
+    .knowledge-group-title { margin: 14px 0 8px; color: #667085; font-size: 12px; }
+    .knowledge-group-title:first-child { margin-top: 0; }
+    #knowledge-source-modal .modal { display: flex; flex-direction: column; overflow: hidden; }
+    #knowledge-source-modal .modal-body { min-height: 0; overflow: auto; }
+    #knowledge-source-modal .modal-head, #knowledge-source-modal .modal-foot { flex-shrink: 0; }
+    .knowledge-source-search { display: flex; gap: 8px; margin: 16px 0 10px; }
+    .knowledge-source-search .field { min-width: 0; }
+    .knowledge-source-search .btn { flex-shrink: 0; white-space: nowrap; }
+    .knowledge-source-hint { min-height: 20px; margin-bottom: 12px; color: var(--muted); font-size: 12px; }
+    .knowledge-source-list { height: 332px; overflow: auto; padding: 1px 4px 1px 1px; }
+    .knowledge-source-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-content: start; gap: 12px; }
+    .knowledge-source-card { min-width: 0; display: grid; grid-template-columns: 36px minmax(0,1fr); align-items: start; gap: 10px; padding: 14px 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
+    .knowledge-source-card:hover, .knowledge-source-card.is-selected { border-color: var(--primary); background: #f8fbff; }
+    .knowledge-source-card:focus-within { outline: 2px solid var(--primary); outline-offset: 1px; }
+    .knowledge-source-card.is-disabled { background: var(--soft); cursor: not-allowed; }
+    .knowledge-source-card.is-disabled:hover { border-color: var(--border); }
+    .knowledge-source-content { min-width: 0; }
+    .knowledge-source-name { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .knowledge-source-name strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+    .knowledge-source-name input { flex-shrink: 0; accent-color: var(--primary); }
+    .knowledge-source-description { display: -webkit-box; min-height: 36px; margin-top: 6px; overflow: hidden; color: var(--muted); font-size: 12px; line-height: 18px; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+    .knowledge-source-meta { margin-top: 8px; color: var(--muted); font-size: 12px; }
+    .knowledge-source-state { display: block; margin-top: 7px; color: var(--success); font-size: 12px; }
+    .knowledge-source-card.is-disabled .knowledge-source-state { color: var(--muted); }
+    .knowledge-source-empty { grid-column: 1 / -1; display: grid; justify-items: center; align-content: center; gap: 10px; min-height: 290px; color: var(--muted); }
+    .knowledge-source-selection { align-self: center; flex: 1; min-width: 0; color: #667085; font-size: 12px; }
+    .identity-edit { display: grid; grid-template-columns: 76px minmax(0,1fr); gap: 16px; }
+    .toast { position: fixed; top: 76px; left: 50%; z-index: 200; display: none; padding: 9px 16px; border: 1px solid #d9f0e3; border-radius: 8px; background: #fff; box-shadow: var(--shadow); transform: translateX(-50%); }
+    .toast.show { display: block; }
+    .state-panel { display: none; height: 100%; min-height: 280px; align-items: center; justify-content: center; flex-direction: column; gap: 12px; text-align: center; }
+    .state-panel.show { display: flex; }
+    .state-symbol { width: 58px; height: 58px; display: grid; place-items: center; border-radius: 50%; background: #f2f5fb; color: #8a94a8; font-size: 22px; }
+    .skeleton { position: relative; overflow: hidden; background: #edf0f4; border-radius: 5px; }
+    .skeleton::after { position: absolute; inset: 0; background: linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent); content: ""; animation: shine 1.2s infinite; }
+    @keyframes shine { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+    .loading-grid { display: none; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    .loading-grid.show { display: grid; }
+    .loading-card { height: 166px; padding: 16px; border: 1px solid #e7ecf3; border-radius: 12px; }
+
+    @media (max-width: 1100px) {
+      .card-grid, .agent-showcase { grid-template-columns: repeat(2,minmax(220px,1fr)); }
+      .builder-body { grid-template-columns: minmax(420px,48%) minmax(440px,52%); }
+      .channel-row { grid-template-columns: 90px 74px 74px minmax(110px,1fr) 120px; }
+    }
+    @media (max-width: 820px) {
+      .prototype-title, .prototype-state span { display: none; }
+      .prototype-bar { padding: 0 8px; }
+      .shell { grid-template-columns: 64px minmax(0,1fr); }
+      .brand { padding: 0 18px; }
+      .brand span:last-child, .menu-item span:last-child { display: none; }
+      .menu-item { justify-content: center; padding: 0; }
+      .menu-item.active::before { left: -12px; }
+      .page-pad { padding: 18px; }
+      .card-grid, .agent-showcase, .entry-grid { grid-template-columns: 1fr; }
+      .builder-body { grid-template-columns: minmax(0,1fr); }
+      .builder-identity { max-width: 260px; }
+      .builder-status-group { display: none; }
+      .debug-panel { display: none; }
+      .retrieval-grid { grid-template-columns: 1fr; }
+      .chat-layout.active { grid-template-columns: minmax(0,1fr); }
+      .task-panel { display: none; }
+      .home-grid { width: calc(100% - 28px); }
+      .home-title { font-size: 25px; }
+      .table-wrap { overflow-x: auto; }
+      table { min-width: 920px; }
+      .channel-row { min-width: 650px; }
+      .channel-list { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="prototype-bar">
+    <div class="prototype-title">智能体 V1 · 真实代码对齐稿</div>
+    <nav class="scenario-tabs" aria-label="原型场景">
+      <button class="scenario-btn active" data-screen="workflow-tool">工作流工具发布</button>
+      <button class="scenario-btn" data-screen="agent-list">用户端智能体</button>
+      <button class="scenario-btn" data-screen="agent-builder">智能体编辑</button>
+      <button class="scenario-btn" data-screen="agent-manage">智能体管理</button>
+      <button class="scenario-btn" data-screen="agent-review">智能体审核</button>
+      <button class="scenario-btn" data-screen="agent-home">首页问答</button>
+    </nav>
+    <label class="prototype-state"><span>页面状态</span>
+      <select id="state-select" disabled>
+        <option value="normal">正常</option>
+        <option value="loading">加载中</option>
+        <option value="empty">空状态</option>
+        <option value="error">加载失败</option>
+        <option value="forbidden">权限受限</option>
+      </select>
+    </label>
+  </header>
+
+  <main id="app">
+    <section class="screen active" id="workflow-tool">
+      <div class="shell">
+        <aside class="sidebar client-menu"></aside>
+        <div class="shell-main">
+          <header class="topbar"><div class="breadcrumb">工作流 / 合同审查流程 / 编辑</div><div class="top-actions"><button class="history-btn">历史问答</button><span class="avatar">陈</span></div></header>
+          <div class="page workflow-editor">
+            <div class="editor-toolbar"><button class="btn">← 返回</button><strong>合同审查流程</strong><span class="tag success">已启用 v3</span><span style="flex:1"></span><button class="btn">保存</button><button class="btn primary" data-open-drawer="publish-drawer">发布管理</button></div>
+            <div class="workflow-canvas">
+              <div class="node one"><strong>开始</strong><span class="subtle small">上传合同文件</span></div>
+              <div class="node two"><strong>知识检索</strong><span class="subtle small">合同制度知识库</span></div>
+              <div class="node three"><strong>大模型</strong><span class="subtle small">识别风险条款</span></div>
+              <div class="node four"><strong>输出</strong><span class="subtle small">审查结果与建议</span></div>
+            </div>
+            <div class="drawer-mask open" id="publish-drawer">
+              <aside class="drawer">
+                <div class="drawer-head"><span>发布管理</span><div><button class="btn link">审核历史</button><button class="close" data-close-drawer="publish-drawer">×</button></div></div>
+                <div class="drawer-body">
+                  <div class="version-card"><span class="version-icon">V</span><div><strong>当前启用版本 <span class="tag success">v3</span></strong><div class="subtle small" style="margin-top:8px">最近更新　2026-08-20 10:24</div><div class="subtle small">版本说明　优化合同风险识别规则</div></div></div>
+                  <div class="section-title"><span>版本管理</span></div>
+                  <div class="channel-list"><div class="channel-row header"><span>版本</span><span>状态</span><span>说明</span><span>创建时间</span><span>操作</span></div><div class="channel-row"><strong>v3</strong><span class="tag success">已启用</span><span>风险识别优化</span><span>08-20 10:24</span><button class="btn link">查看</button></div></div>
+                  <div class="section-title"><span>发布渠道</span></div>
+                  <div class="channel-list">
+                    <div class="channel-row header"><span>渠道</span><span>状态</span><span>启用版本</span><span>地址/配置</span><span>操作</span></div>
+                    <div class="channel-row"><strong>OpenAPI</strong><span class="tag success">已发布</span><span>v3</span><span class="subtle">/v1/workflow/run</span><span><button class="btn link">管理</button>　<button class="btn link danger">停用</button></span></div>
+                    <div class="channel-row"><strong>问答页</strong><span class="tag warning">审核中</span><span>v3</span><span class="subtle">审核通过后生效</span><button class="btn link danger">取消审核</button></div>
+                    <div class="channel-row"><strong>智能体工具</strong><span class="tag gray">未发布</span><span>v3</span><span class="subtle">尚未配置</span><button class="btn link" data-modal="tool-config-modal">配置并发布</button></div>
+                  </div>
+                  <div class="notice"><span>ⓘ</span><span>智能体工具始终调用当前启用版本；版本切换审核通过后，无需重新发布工具。</span></div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="agent-list">
+      <div class="shell">
+        <aside class="sidebar client-menu"></aside>
+        <div class="shell-main">
+          <header class="topbar"><div></div><div class="top-actions"><button class="history-btn">历史问答</button><span class="avatar">陈</span></div></header>
+          <div class="page"><div class="page-pad">
+            <h1>智能体</h1>
+            <div class="toolbar"><select class="select"><option>全部状态</option><option>草稿</option><option>已发布</option><option>已停用</option></select><input class="field" placeholder="搜索智能体" /><span class="spacer"></span><button class="btn primary" data-modal="create-agent-modal">＋ 新建智能体</button></div>
+            <div class="state-host">
+              <div class="loading-grid state-loading"><div class="loading-card"><div class="skeleton" style="width:48px;height:48px"></div><div class="skeleton" style="width:65%;height:15px;margin-top:14px"></div></div><div class="loading-card"><div class="skeleton" style="width:48px;height:48px"></div><div class="skeleton" style="width:65%;height:15px;margin-top:14px"></div></div><div class="loading-card"><div class="skeleton" style="width:48px;height:48px"></div><div class="skeleton" style="width:65%;height:15px;margin-top:14px"></div></div></div>
+              <div class="state-panel state-empty"><span class="state-symbol">◇</span><strong>暂无智能体</strong><span class="subtle">创建一个智能体，连接知识库和工具</span><button class="btn primary" data-modal="create-agent-modal">新建智能体</button></div>
+              <div class="state-panel state-error"><span class="state-symbol">!</span><strong>智能体列表加载失败</strong><span class="subtle">请检查网络后重试</span><button class="btn" data-reset-state>重试</button></div>
+              <div class="state-panel state-forbidden"><span class="state-symbol">⌁</span><strong>暂无智能体模块权限</strong><span class="subtle">请联系企业管理员开通相关权限</span></div>
+              <div class="normal-content">
+                <div class="card-grid">
+                  <article class="agent-card"><div class="agent-card-main"><span class="agent-icon">合</span><div><div class="agent-name">合同审查助手</div><div class="agent-desc">结合合同制度知识和审查流程，识别高风险条款并给出修改建议。</div></div><span class="tag success">已发布</span></div><div class="agent-card-foot"><span class="meta">更新于 10 分钟前</span><button class="btn link" data-switch="agent-builder">编辑</button><button class="btn link danger" data-confirm="删除后智能体将立即下线，历史会话只能查看，且无法恢复。确认删除“合同审查助手”？" data-confirm-title="删除智能体" data-confirm-result="智能体已删除并下线">删除</button></div></article>
+                  <article class="agent-card"><div class="agent-card-main"><span class="agent-icon">报</span><div><div class="agent-name">周报整理助手</div><div class="agent-desc">根据项目资料生成结构化周报，整理风险和下周计划。</div></div><span class="tag gray">草稿</span></div><div class="agent-card-foot"><span class="meta">发布审核中 · 更新于 2 小时前</span><button class="btn link" data-switch="agent-builder">编辑</button><button class="btn link danger" data-confirm="删除后当前发布审核将自动取消，且无法恢复。确认删除“周报整理助手”？" data-confirm-title="删除审核中的智能体" data-confirm-result="智能体已删除，待审核申请已取消">删除</button></div></article>
+                  <article class="agent-card"><div class="agent-card-main"><span class="agent-icon">标</span><div><div class="agent-name">招投标问答助手</div><div class="agent-desc">查询招投标知识并生成问题答复。</div></div><span class="tag danger">已停用</span></div><div class="agent-card-foot"><span class="meta">更新于昨天</span><button class="btn link" data-switch="agent-builder">编辑</button><button class="btn link danger" data-confirm="删除后历史会话仍可查看，但智能体无法恢复。确认删除“招投标问答助手”？" data-confirm-title="删除智能体" data-confirm-result="智能体已删除">删除</button></div></article>
+                </div>
+                <div class="pagination"><span class="page-no active">1</span><span class="page-no">2</span><span class="page-no">›</span></div>
+              </div>
+            </div>
+          </div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="agent-builder">
+      <div class="builder">
+        <header class="builder-head"><button class="btn" data-switch="agent-list">← 返回</button><div class="builder-identity"><span class="agent-icon" id="builder-avatar">合</span><div class="builder-identity-text"><div class="builder-identity-name" id="builder-name">合同审查助手</div><div class="builder-identity-desc" id="builder-desc">结合合同制度知识和审查流程，识别高风险条款</div></div><button class="btn icon" title="编辑基本信息" aria-label="编辑基本信息" data-modal="basic-info-modal">✎</button></div><span class="spacer"></span><div class="builder-status-group"><span class="builder-status-item"><span class="builder-status-label">发布状态</span><span class="tag success status" id="publish-status">已发布</span></span><span class="builder-status-item"><span class="builder-status-label">草稿状态</span><span class="tag success" id="draft-status">已保存</span></span></div><button class="btn" id="save-draft">保存草稿</button><button class="btn primary" id="publish-agent-button" data-modal="publish-agent-modal">提交变更审核</button></header>
+        <div class="builder-body">
+          <main class="builder-form"><div class="form-panel">
+            <section class="config-section"><div class="config-head"><span>AI 配置</span></div><div class="config-body"><div class="form-item"><label class="form-label required">AI 模型</label><select class="select" id="agent-model"><option value="" disabled>请选择 AI 模型</option><option selected>讯飞星火 X1</option><option>星火 4.0 Ultra</option></select></div><div class="form-item"><label class="form-label">深度思考</label><select class="select"><option selected>关闭</option><option>开启</option></select><span class="form-help">默认关闭；开启后可能增加响应时间和资源消耗。</span></div><div class="form-item" style="margin-bottom:0"><label class="form-label">系统 Prompt</label><textarea class="textarea" style="min-height:170px">你是企业合同审查助手。请优先参考企业合同制度知识库；需要执行结构化审查时调用合同审查工具。回答中明确标注风险等级、依据和修改建议，不得编造制度条款。</textarea><span class="form-help">可选，未填写时使用平台默认 Agent Prompt。</span></div></div></section>
+            <section class="config-section"><div class="config-head"><span>系统工具（3）</span><button class="btn link" data-modal="resource-modal" data-resource="system">＋ 选择</button></div><div class="config-body"><div class="resource-list"><div class="resource-row"><span class="resource-symbol">系</span><div><strong>获取当前时间</strong><div class="subtle small">返回当前日期、时间及时区</div></div><button class="btn link danger">移除</button></div><div class="resource-row"><span class="resource-symbol">系</span><div><strong>Base64 解析</strong><div class="subtle small">解析合法的 Base64 文本内容</div></div><button class="btn link danger">移除</button></div><div class="resource-row"><span class="resource-symbol">系</span><div><strong>保存为 Word 文档</strong><div class="subtle small">生成 Word 文件并上传到文件存储</div></div><button class="btn link danger">移除</button></div></div></div></section>
+            <section class="config-section"><div class="config-head"><span>工作流工具（1）</span><button class="btn link" data-modal="resource-modal" data-resource="workflow">＋ 选择</button></div><div class="config-body"><div class="resource-list"><div class="resource-row"><span class="resource-symbol">工</span><div><strong>合同风险审查</strong><div class="subtle small">根据合同文本输出风险条款、等级与建议</div></div><button class="btn link danger">移除</button></div></div></div></section>
+            <section class="config-section" id="builder-knowledge-section">
+              <div class="config-head"><span>知识库与知识图谱</span><button class="btn link" data-modal="knowledge-source-modal">＋ 选择知识库</button></div>
+              <div class="config-body">
+                <div class="knowledge-group-title" id="knowledge-base-count">知识库（2）</div><div class="resource-list" id="selected-knowledge-bases"></div>
+                <div class="knowledge-group-title" id="knowledge-graph-count">知识图谱（0）</div><div class="resource-list" id="selected-knowledge-graphs"></div>
+                <div class="retrieval-settings"><div class="retrieval-title">知识库检索设置</div><div class="retrieval-grid"><div class="form-item"><label class="form-label">检索条数</label><input class="field" type="number" min="1" max="20" value="5" /><span class="form-help">单次检索最多返回 1—20 条内容</span></div><div class="form-item"><label class="form-label">检索类型</label><select class="select"><option selected>全部（文档 + 问答对）</option><option>仅文档</option><option>仅问答对</option></select></div><div class="form-item"><label class="form-label">相似度阈值</label><input class="field" type="number" min="0" max="1" step="0.01" placeholder="不限制" /><span class="form-help">可选，填写 0—1；值越高匹配要求越严格</span></div></div><div class="form-help" style="margin-top:10px">检索问题和超时时间由系统根据对话统一处理，无需配置。</div></div>
+              </div>
+            </section>
+            <section class="config-section"><div class="config-head"><span>对话设置</span></div><div class="config-body"><div class="form-item"><label class="form-label">对话开场白</label><textarea class="textarea">你好，我可以帮你审查合同风险。上传合同或直接描述需要关注的问题吧。</textarea></div><div class="form-item" style="margin-bottom:0"><label class="form-label">预设问题（最多 4 条）</label><input class="field" value="帮我审查这份采购合同" /><input class="field" value="这份合同有哪些付款风险？" style="margin-top:8px" /><button class="btn link" style="margin-top:8px">＋ 添加预设问题</button></div></div></section>
+            <section class="config-section"><div class="config-head"><span>发布设置</span><span class="tag success">已配置</span></div><div class="config-body"><div class="form-item" style="margin-bottom:0"><label class="form-label required">发布组织</label><div class="org-tree"><label class="tree-row"><input type="checkbox" /> 星火科技</label><label class="tree-row indent"><input type="checkbox" checked /> 法务部</label><label class="tree-row indent"><input type="checkbox" checked /> 采购中心</label><label class="tree-row indent"><input type="checkbox" /> 研发中心</label></div><span class="form-help">所选组织及其全部下级组织成员均可使用，不提供额外开关。配置变更需重新提交审核。</span></div></div></section>
+          </div></main>
+          <aside class="debug-panel"><div class="debug-head"><span>调试预览</span><button class="btn link" id="clear-debug">清空对话</button></div><div class="debug-messages" id="debug-messages"><div class="bubble"><strong>合同审查助手</strong><p style="margin:6px 0 0">你好，我可以帮你审查合同风险。上传合同或直接描述需要关注的问题吧。</p></div></div><div class="debug-input"><div class="input-send"><input class="field" id="debug-question" value="这份采购合同有哪些风险？" /><button class="send" id="debug-send">➤</button></div><div class="subtle small" style="margin-top:6px">右侧使用当前草稿版本调试，线上用户继续使用已生效版本。</div></div></aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="agent-manage">
+      <div class="shell"><aside class="sidebar admin-menu"></aside><div class="shell-main"><header class="topbar"><strong>企业管理控制台</strong><div class="top-actions"><span class="avatar">管</span></div></header><div class="page"><div class="admin-page">
+        <h1 style="margin-bottom:4px">智能体管理</h1>
+        <div class="admin-toolbar"><select class="select"><option>全部状态</option><option>草稿</option><option>已发布</option><option>已停用</option></select><input class="field" placeholder="搜索智能体名称" /><button class="btn">重置</button></div>
+        <div class="state-host" style="flex:1;min-height:0;display:flex;flex-direction:column">
+          <div class="state-panel state-loading"><span class="state-symbol skeleton"></span><strong>正在加载智能体列表</strong></div>
+          <div class="state-panel state-empty"><span class="state-symbol">◇</span><strong>暂无智能体</strong><span class="subtle">企业内还没有已创建的智能体</span></div>
+          <div class="state-panel state-error"><span class="state-symbol">!</span><strong>列表加载失败</strong><button class="btn" data-reset-state>重试</button></div>
+          <div class="state-panel state-forbidden"><span class="state-symbol">⌁</span><strong>无智能体管理权限</strong></div>
+          <div class="normal-content" style="flex:1;min-height:0;display:flex;flex-direction:column"><div class="table-wrap"><table><thead><tr><th style="width:200px">智能体名称</th><th style="width:110px">创建者</th><th style="width:100px">状态</th><th style="width:170px">创建时间</th><th style="width:170px">更新时间</th><th style="width:190px">操作</th></tr></thead><tbody>
+            <tr><td class="name-cell">合同审查助手</td><td>陈晨</td><td><span class="tag success">已发布</span></td><td>2026-08-12 09:30</td><td>2026-08-20 10:24</td><td><div class="table-actions"><button class="btn link" data-open-drawer="manage-detail">查看详情</button><button class="btn link danger" data-confirm="停用后组织用户将立即无法继续使用，确认停用“合同审查助手”？" data-confirm-title="停用智能体" data-confirm-result="智能体已停用">停用</button><button class="btn link danger" data-confirm="删除后智能体将立即下线，待审核申请自动取消，历史会话只能查看。确认删除“合同审查助手”？" data-confirm-title="删除智能体" data-confirm-result="智能体已删除并下线">删除</button></div></td></tr>
+            <tr><td class="name-cell">周报整理助手</td><td>林晓</td><td><span class="tag gray">草稿</span></td><td>2026-08-18 14:06</td><td>2026-08-20 09:18</td><td><div class="table-actions"><button class="btn link" data-open-drawer="manage-detail">查看详情</button><button class="btn link danger" data-confirm="该智能体正在审核中，删除后审核申请将自动取消且无法恢复。确认删除？" data-confirm-title="删除审核中的智能体" data-confirm-result="智能体已删除，待审核申请已取消">删除</button></div></td></tr>
+            <tr><td class="name-cell">投标材料助手</td><td>李敏</td><td><span class="tag danger">已停用</span></td><td>2026-08-10 16:21</td><td>2026-08-18 09:12</td><td><div class="table-actions"><button class="btn link" data-open-drawer="manage-detail">查看详情</button><button class="btn link danger" data-confirm="删除后智能体无法恢复，历史会话仍可查看。确认删除“投标材料助手”？" data-confirm-title="删除智能体" data-confirm-result="智能体已删除">删除</button></div></td></tr>
+          </tbody></table></div><div class="pagination"><span style="margin-right:auto" class="subtle">共 23 条</span><span class="page-no active">1</span><span class="page-no">2</span><span class="page-no">›</span></div></div>
+        </div>
+        <div class="drawer-mask" id="manage-detail"><aside class="drawer narrow"><div class="drawer-head"><span>智能体详情</span><button class="close" data-close-drawer="manage-detail">×</button></div><div class="drawer-body"><h3>基础信息</h3><table><tbody><tr><td class="subtle">名称</td><td>合同审查助手</td></tr><tr><td class="subtle">创建者</td><td>陈晨</td></tr><tr><td class="subtle">状态</td><td><span class="tag success">已发布</span></td></tr><tr><td class="subtle">创建时间</td><td>2026-08-12 09:30</td></tr><tr><td class="subtle">更新时间</td><td>2026-08-20 10:24</td></tr></tbody></table><div class="detail-block"><div class="form-label">描述</div><div class="detail-value">结合合同制度知识和审查流程，识别高风险条款并给出修改建议。</div></div><div class="detail-block"><div class="form-label">发布组织范围</div><div class="detail-value">法务部、采购中心<br><span class="subtle small">组织授权自动包含其全部下级组织</span></div></div><div class="notice"><span>ⓘ</span><span>管理员仅查看基础信息，可停用或删除智能体，不能代替创建者修改配置。</span></div></div><div class="drawer-foot"><button class="btn danger" data-confirm="停用后组织用户将立即无法继续使用，确认停用“合同审查助手”？" data-confirm-title="停用智能体" data-confirm-result="智能体已停用">停用</button><button class="btn danger" data-confirm="删除后智能体将立即下线，待审核申请自动取消，历史会话只能查看。确认删除？" data-confirm-title="删除智能体" data-confirm-result="智能体已删除并下线">删除</button></div></aside></div>
+      </div></div></div></div>
+    </section>
+
+    <section class="screen" id="agent-review">
+      <div class="shell"><aside class="sidebar admin-menu"></aside><div class="shell-main"><header class="topbar"><strong>企业管理控制台</strong><div class="top-actions"><span class="avatar">管</span></div></header><div class="page"><div class="admin-page">
+        <div class="tabs admin-tabs"><button class="tab">知识库审核</button><button class="tab">工作流审核</button><button class="tab active">智能体审核</button></div>
+        <div class="admin-toolbar"><select class="select"><option>全部类型</option><option>首次发布</option><option>配置变更</option></select><select class="select"><option>全部状态</option><option>待审核</option><option>已通过</option><option>已驳回</option><option>已取消</option></select><input class="field" placeholder="搜索智能体名称" /><button class="btn">重置</button></div>
+        <div class="state-host" style="flex:1;min-height:0;display:flex;flex-direction:column"><div class="state-panel state-loading"><span class="state-symbol skeleton"></span><strong>正在加载审核列表</strong></div><div class="state-panel state-empty"><span class="state-symbol">◇</span><strong>暂无审核申请</strong></div><div class="state-panel state-error"><span class="state-symbol">!</span><strong>审核列表加载失败</strong><button class="btn" data-reset-state>重试</button></div><div class="state-panel state-forbidden"><span class="state-symbol">⌁</span><strong>无发布审核权限</strong></div>
+        <div class="normal-content" style="flex:1;min-height:0;display:flex;flex-direction:column"><div class="table-wrap"><table><thead><tr><th style="width:220px">智能体名称</th><th style="width:120px">审核类型</th><th style="width:110px">申请人</th><th style="width:120px">申请状态</th><th style="width:180px">时间</th><th style="width:180px">操作</th></tr></thead><tbody>
+          <tr><td class="name-cell">合同审查助手</td><td>配置变更</td><td>陈晨</td><td><span class="tag warning">待审核</span></td><td>2026-08-20 10:32</td><td><div class="table-actions"><button class="btn link" data-open-drawer="review-detail">查看</button><button class="btn link" data-confirm="确认通过该智能体配置变更？" data-confirm-title="通过审核" data-confirm-result="审核已通过">通过</button><button class="btn link danger" data-modal="reject-modal">驳回</button></div></td></tr>
+          <tr><td class="name-cell">周报整理助手</td><td>首次发布</td><td>林晓</td><td><span class="tag warning">待审核</span></td><td>2026-08-20 09:18</td><td><div class="table-actions"><button class="btn link" data-open-drawer="review-detail">查看</button><button class="btn link" data-confirm="确认通过该智能体首次发布申请？" data-confirm-title="通过审核" data-confirm-result="审核已通过">通过</button><button class="btn link danger" data-modal="reject-modal">驳回</button></div></td></tr>
+          <tr><td class="name-cell">制度问答助手</td><td>首次发布</td><td>王宁</td><td><span class="tag success">已通过</span></td><td>2026-08-19 15:02</td><td><button class="btn link" data-open-drawer="review-detail">查看</button></td></tr>
+        </tbody></table></div><div class="pagination"><span style="margin-right:auto" class="subtle">共 18 条</span><span class="page-no active">1</span><span class="page-no">2</span></div></div></div>
+        <div class="drawer-mask" id="review-detail"><aside class="drawer"><div class="drawer-head"><span>智能体审核详情</span><button class="close" data-close-drawer="review-detail">×</button></div><div class="drawer-body"><div class="notice" style="margin-top:0"><span>ⓘ</span><span>这是配置变更申请。以下展示审核通过后将生效的构建与发布配置，不提供逐字段差异对比。</span></div><h3 style="margin-top:20px">申请信息</h3><table><tbody><tr><td class="subtle">智能体名称</td><td>合同审查助手</td><td class="subtle">申请人</td><td>陈晨</td></tr><tr><td class="subtle">审核类型</td><td>配置变更</td><td class="subtle">申请时间</td><td>2026-08-20 10:32</td></tr></tbody></table><h3 style="margin-top:22px">目标构建与发布配置</h3><table><tbody><tr><td class="subtle">AI 模型</td><td>讯飞星火 X1</td><td class="subtle">深度思考</td><td>关闭</td></tr><tr><td class="subtle">系统 Prompt</td><td colspan="3" style="white-space:normal">你是企业合同审查助手。请优先参考企业合同制度知识库；需要执行结构化审查时调用合同审查工具，并明确标注风险等级、依据和修改建议。</td></tr><tr><td class="subtle">知识库</td><td colspan="3">合同制度知识库、法务案例库</td></tr><tr><td class="subtle">检索设置</td><td colspan="3">返回 5 条 · 全部（文档 + 问答对）· 相似度不限</td></tr><tr><td class="subtle">系统工具</td><td colspan="3" style="white-space:normal">获取当前时间、Base64 解析、保存为 Word 文档</td></tr><tr><td class="subtle">工作流工具</td><td colspan="3">合同风险审查</td></tr><tr><td class="subtle">对话开场白</td><td colspan="3" style="white-space:normal">你好，我可以帮你审查合同风险。上传合同或直接描述需要关注的问题吧。</td></tr><tr><td class="subtle">预设问题</td><td colspan="3" style="white-space:normal">帮我审查这份采购合同；这份合同有哪些付款风险？</td></tr><tr><td class="subtle">发布组织</td><td colspan="3">法务部、采购中心 <span class="subtle small">（自动包含下级组织）</span></td></tr></tbody></table><div class="notice"><span>!</span><span>通过前系统将再次校验智能体未删除、模型和深度思考配置兼容，以及知识库与检索参数、系统工具、工作流工具和组织范围仍然可用。</span></div></div><div class="drawer-foot"><button class="btn" data-modal="reject-modal">驳回</button><button class="btn primary" data-confirm="确认通过该智能体配置变更？" data-confirm-title="通过审核" data-confirm-result="审核已通过">通过</button></div></aside></div>
+      </div></div></div></div>
+    </section>
+
+    <section class="screen" id="agent-home">
+      <div class="shell"><aside class="sidebar client-menu"></aside><div class="shell-main"><header class="topbar"><div></div><div class="top-actions"><button class="history-btn">历史问答</button><span class="avatar">陈</span></div></header><div class="page"><div class="state-host" style="height:100%"><div class="state-panel state-loading"><span class="state-symbol skeleton"></span><strong>正在加载可用智能体</strong></div><div class="state-panel state-empty"><span class="state-symbol">◇</span><strong>暂无可用智能体</strong><span class="subtle">当前账号暂无可使用的已发布智能体</span></div><div class="state-panel state-error"><span class="state-symbol">!</span><strong>可用智能体加载失败</strong><button class="btn" data-reset-state>重试</button></div><div class="state-panel state-forbidden"><span class="state-symbol">⌁</span><strong>当前账号不可使用智能体</strong></div><div class="normal-content" style="height:100%">
+        <div class="home-content" id="home-entry"><div class="home-grid"><div class="home-title">星火知识库 · <span>让知识成为生产力</span></div><div class="home-input"><textarea placeholder="输入问题，星火给你答案！"></textarea><button class="send">➤</button></div><section><div class="section-head"><strong>高级模式</strong><span class="subtle small">按流程或智能体完成复杂任务</span></div><div class="entry-grid" style="margin-top:12px"><button class="entry-card"><span class="entry-icon">流</span><span><strong>工作流模式</strong><span class="subtle small">选择已发布流程，按固定步骤处理问题</span></span><span>›</span></button><button class="entry-card" id="view-agent-list"><span class="entry-icon">智</span><span><strong>智能体模式</strong><span class="subtle small">选择当前可用智能体，结合知识与工具完成任务</span></span><span>›</span></button></div></section></div></div>
+        <div class="agent-picker" id="agent-picker"><div class="agent-picker-inner"><div class="picker-head"><button class="btn" id="back-mode">← 返回</button><div><h2>选择智能体</h2><div class="subtle small">仅展示当前账号可使用的已发布智能体</div></div></div><div class="agent-showcase"><button class="home-agent start-chat" style="text-align:left"><div class="home-agent-main"><span class="agent-icon">合</span><span><strong>合同审查助手</strong><p class="subtle small">识别合同风险条款并给出修改建议</p></span></div></button><button class="home-agent start-chat" style="text-align:left"><div class="home-agent-main"><span class="agent-icon">制</span><span><strong>制度问答助手</strong><p class="subtle small">查询企业制度和办事流程</p></span></div></button><button class="home-agent start-chat" style="text-align:left"><div class="home-agent-main"><span class="agent-icon">报</span><span><strong>周报整理助手</strong><p class="subtle small">整理项目资料并生成结构化周报</p></span></div></button></div></div></div>
+        <div class="chat-layout" id="home-chat"><main class="chat-main"><div class="chat-head"><button class="btn" id="back-home">←</button><span class="agent-icon" style="width:36px;height:36px">合</span><div><strong>合同审查助手</strong><div class="subtle small">智能体问答</div></div></div><div class="chat-scroll" id="chat-scroll"><div class="bubble"><strong>合同审查助手</strong><p style="margin:6px 0 10px">你好，我可以帮你审查合同风险。上传合同或直接描述需要关注的问题吧。</p><button class="btn preset">帮我审查这份采购合同</button> <button class="btn preset">有哪些付款风险？</button></div></div><div class="chat-compose"><div class="input-send"><input class="field" id="chat-question" placeholder="向合同审查助手提问" /><button class="send" id="chat-send">➤</button></div></div></main><aside class="task-panel"><h3>本次任务</h3><p class="subtle small">智能体会根据问题自动选择知识与工具。</p><div id="task-list"><div class="task-item"><span class="task-dot">✓</span><div><strong>理解问题</strong><div class="subtle small">已确认审查目标</div></div></div><div class="task-item"><span class="task-dot">·</span><div><strong>等待提问</strong><div class="subtle small">尚未调用知识库或工具</div></div></div></div></aside></div>
+      </div></div></div></div></div>
+    </section>
+  </main>
+
+  <div class="modal-mask" id="create-agent-modal"><div class="modal"><div class="modal-head"><span>创建智能体</span><button class="close" data-close-modal>×</button></div><div class="modal-body"><div class="form-item"><label class="form-label required">名称</label><input class="field" id="create-agent-name" maxlength="50" placeholder="例如：合同审查助手" /><span class="form-error" id="create-agent-name-error" style="display:none">请输入智能体名称</span></div><div class="form-item" style="margin-bottom:0"><label class="form-label">描述</label><textarea class="textarea" id="create-agent-desc" style="min-height:86px" placeholder="简要说明这个智能体可以解决什么问题"></textarea><span class="form-help">可选；创建后还可修改名称、描述和头像。</span></div></div><div class="modal-foot"><button class="btn" data-close-modal>取消</button><button class="btn primary" id="create-agent-submit">创建</button></div></div></div>
+
+  <div class="modal-mask" id="basic-info-modal"><div class="modal"><div class="modal-head"><span>编辑基本信息</span><button class="close" data-close-modal>×</button></div><div class="modal-body"><div class="notice" style="margin:0 0 18px"><span>ⓘ</span><span>基本信息保存后立即生效，不改变构建草稿状态，不发起配置变更审核。</span></div><div class="identity-edit"><div class="agent-avatar-edit"><span class="agent-icon" id="basic-avatar">合</span><button class="btn" id="upload-avatar">上传头像</button><span class="subtle small">可选</span></div><div><div class="form-item"><label class="form-label required">名称</label><input class="field" id="basic-info-name" value="合同审查助手" maxlength="50" /><span class="form-error" id="basic-info-name-error" style="display:none">请输入智能体名称</span></div><div class="form-item" style="margin-bottom:0"><label class="form-label">描述</label><textarea class="textarea" id="basic-info-desc" style="min-height:86px">结合合同制度知识和审查流程，识别高风险条款并给出修改建议。</textarea><span class="form-help">可选，未填写时首页不展示描述。</span></div></div></div></div><div class="modal-foot"><button class="btn" data-close-modal>取消</button><button class="btn primary" id="basic-info-submit">保存</button></div></div></div>
+
+  <div class="modal-mask" id="tool-config-modal"><div class="modal"><div class="modal-head"><span>发布为智能体工具</span><button class="close" data-close-modal>×</button></div><div class="modal-body"><div class="notice" style="margin-top:0"><span>ⓘ</span><span>工具输入和输出来自当前启用版本 v3，配置审核通过后可被所选组织内的智能体创建者挂载。</span></div><div class="form-item"><label class="form-label required">工具名称</label><input class="field" value="合同风险审查" /><span class="form-help">名称应简洁描述工具能力，便于模型识别。</span></div><div class="form-item"><label class="form-label required">工具描述</label><textarea class="textarea">根据合同文本识别风险条款，返回风险等级、依据和修改建议。适用于采购、销售类合同初审。</textarea><span class="form-help">请说明适用场景、主要输入和返回结果。</span></div><div class="form-item"><label class="form-label required">可挂载组织</label><div class="org-tree"><label class="tree-row"><input type="checkbox" /> 星火科技</label><label class="tree-row indent"><input type="checkbox" checked /> 法务部</label><label class="tree-row indent"><input type="checkbox" checked /> 采购中心</label><label class="tree-row indent"><input type="checkbox" /> 研发中心</label></div><span class="form-help">所选组织及其全部下级组织成员均可挂载，不提供额外开关。</span></div></div><div class="modal-foot"><button class="btn" data-close-modal>取消</button><button class="btn primary" data-submit="智能体工具发布审核已提交">提交发布审核</button></div></div></div>
+
+  <div class="modal-mask" id="resource-modal"><div class="modal wide"><div class="modal-head"><span id="resource-title">选择工作流工具</span><button class="close" data-close-modal>×</button></div><div class="modal-body"><input class="field" placeholder="搜索名称" style="margin-bottom:14px" /><div class="choice-list" id="resource-choices"><label class="choice"><input type="checkbox" checked /><span class="resource-symbol">工</span><span><strong>合同风险审查</strong><small class="subtle" style="display:block">根据合同文本输出风险条款、等级与建议</small></span><span class="tag success">已发布</span></label><label class="choice"><input type="checkbox" /><span class="resource-symbol">工</span><span><strong>企业信息核验</strong><small class="subtle" style="display:block">查询并核验企业工商信息</small></span><span class="tag success">已发布</span></label><label class="choice" style="opacity:.6"><input type="checkbox" disabled /><span class="resource-symbol">工</span><span><strong>工商信息查询</strong><small class="subtle" style="display:block">工具已停用，不可新增挂载</small></span><span class="tag danger">不可用</span></label></div></div><div class="modal-foot"><button class="btn" data-close-modal>取消</button><button class="btn primary" data-submit="已更新所选资源">确定</button></div></div></div>
+
+  <div class="modal-mask" id="publish-agent-modal"><div class="modal"><div class="modal-head"><span>提交配置变更审核</span><button class="close" data-close-modal>×</button></div><div class="modal-body"><div class="notice" style="margin-top:0"><span>ⓘ</span><span>将提交当前已保存的草稿配置。审核通过后，草稿版本才会覆盖线上生效版本，审核期间不影响当前线上智能体。</span></div><div class="publish-summary" style="margin-top:18px"><div class="summary-row"><span class="summary-label">发布组织</span><span class="summary-value">法务部、采购中心<br><span class="subtle small">所选组织及其全部下级组织成员均可使用</span></span></div><div class="summary-row"><span class="summary-label">调试配置</span><span class="summary-value">当前草稿版本（已保存）</span></div></div></div><div class="modal-foot"><button class="btn" data-close-modal>取消</button><button class="btn primary" data-submit="智能体配置变更审核已提交">提交配置变更审核</button></div></div></div>
+
+  <div class="modal-mask" id="knowledge-source-modal">
+    <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="knowledge-source-title">
+      <div class="modal-head"><span id="knowledge-source-title">选择知识库</span><button class="close" data-close-knowledge-source aria-label="关闭选择知识库弹窗">×</button></div>
+      <div class="modal-body">
+        <div class="tabs" role="tablist" aria-label="知识类型">
+          <button class="tab active" id="knowledge-base-tab" role="tab" data-knowledge-tab="bases" aria-selected="true" aria-controls="knowledge-source-list">知识库</button>
+          <button class="tab" id="knowledge-graph-tab" role="tab" data-knowledge-tab="graphs" aria-selected="false" aria-controls="knowledge-source-list">知识图谱</button>
+        </div>
+        <form class="knowledge-source-search" id="knowledge-source-search-form"><input class="field" id="knowledge-source-search" aria-label="搜索知识库名称" placeholder="搜索知识库名称" maxlength="50" autocomplete="off" /><button class="btn primary" type="submit">搜索</button></form>
+        <div class="knowledge-source-hint" id="knowledge-source-hint">可同时选择知识库和知识图谱，确认后加入智能体。</div>
+        <div class="knowledge-source-list" id="knowledge-source-list" role="tabpanel" aria-labelledby="knowledge-base-tab"><div class="knowledge-source-grid" id="knowledge-source-grid"></div></div>
+      </div>
+      <div class="modal-foot"><span class="knowledge-source-selection" id="knowledge-source-selection" aria-live="polite"></span><button class="btn" data-close-knowledge-source>取消</button><button class="btn primary" id="confirm-knowledge-source">选择</button></div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="reject-modal"><div class="modal"><div class="modal-head"><span>驳回审核</span><button class="close" data-close-modal>×</button></div><div class="modal-body"><div class="form-item"><label class="form-label required">驳回原因</label><textarea class="textarea" id="reject-reason" placeholder="请输入驳回原因，便于申请人修改"></textarea><span class="form-error" id="reject-error" style="display:none">请输入驳回原因</span></div></div><div class="modal-foot"><button class="btn" data-close-modal>取消</button><button class="btn primary" id="reject-submit">确认驳回</button></div></div></div>
+
+  <div class="modal-mask" id="confirm-modal"><div class="modal" style="width:min(430px,92vw)"><div class="modal-head"><span id="confirm-title">操作确认</span><button class="close" data-close-modal>×</button></div><div class="modal-body"><p id="confirm-text" style="margin:0">确认执行该操作？</p></div><div class="modal-foot"><button class="btn" data-close-modal>取消</button><button class="btn primary" id="confirm-ok">确认</button></div></div></div>
+  <div class="toast" id="toast">✓ 操作成功</div>
+
+  <script>
+    const clientItems = [['⌂','首页'],['◇','场景助手'],['◷','历史问答'],['知','知识库'],['流','工作流'],['智','智能体']];
+    const adminItems = [['审','发布与审核'],['流','工作流管理'],['助','场景助手管理'],['智','智能体管理'],['组','组织管理'],['日','审计日志']];
+    function renderMenu(el, items, activeLabel, admin = false) {
+      el.innerHTML = `<div class="brand"><span class="brand-mark">${admin ? '管' : '星'}</span><span>${admin ? '企业管理' : '星火知识库'}</span></div><nav class="menu">${items.map(([icon,label]) => `<div class="menu-item ${label === activeLabel ? 'active' : ''}"><span class="menu-icon">${icon}</span><span>${label}</span></div>`).join('')}</nav>`;
+    }
+    document.querySelectorAll('.client-menu').forEach(el => {
+      const screen = el.closest('.screen').id;
+      renderMenu(el, clientItems, screen === 'workflow-tool' ? '工作流' : screen === 'agent-home' ? '首页' : '智能体');
+    });
+    document.querySelectorAll('.admin-menu').forEach(el => renderMenu(el, adminItems, el.closest('.screen').id === 'agent-review' ? '发布与审核' : '智能体管理', true));
+
+    const toast = document.getElementById('toast');
+    function showToast(text) { toast.textContent = `✓ ${text}`; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 1800); }
+    function switchScreen(id) {
+      document.querySelectorAll('.screen').forEach(el => el.classList.toggle('active', el.id === id));
+      document.querySelectorAll('.scenario-btn').forEach(el => el.classList.toggle('active', el.dataset.screen === id));
+      const stateSelect = document.getElementById('state-select');
+      stateSelect.value = 'normal';
+      stateSelect.disabled = !document.querySelector(`#${id} .state-host`);
+      applyState('normal');
+    }
+    document.querySelectorAll('[data-screen], [data-switch]').forEach(btn => btn.addEventListener('click', () => switchScreen(btn.dataset.screen || btn.dataset.switch)));
+
+    function applyState(state) {
+      const active = document.querySelector('.screen.active');
+      active.querySelectorAll('.state-host').forEach(host => {
+        host.querySelectorAll('.normal-content').forEach(el => {
+          if (!el.dataset.display) el.dataset.display = getComputedStyle(el).display;
+          el.style.display = state === 'normal' ? el.dataset.display : 'none';
+        });
+        host.querySelectorAll('.state-loading,.state-empty,.state-error,.state-forbidden').forEach(el => el.classList.remove('show'));
+        if (state !== 'normal') host.querySelectorAll(`.state-${state}`).forEach(el => el.classList.add('show'));
+      });
+    }
+    document.getElementById('state-select').addEventListener('change', e => applyState(e.target.value));
+    document.querySelectorAll('[data-reset-state]').forEach(btn => btn.addEventListener('click', () => { document.getElementById('state-select').value = 'normal'; applyState('normal'); showToast('已重新加载'); }));
+
+    document.querySelectorAll('[data-open-drawer]').forEach(btn => btn.addEventListener('click', () => document.getElementById(btn.dataset.openDrawer).classList.add('open')));
+    document.querySelectorAll('[data-close-drawer]').forEach(btn => btn.addEventListener('click', () => document.getElementById(btn.dataset.closeDrawer).classList.remove('open')));
+    document.querySelectorAll('[data-modal]').forEach(btn => btn.addEventListener('click', () => {
+      const modal = document.getElementById(btn.dataset.modal);
+      if (btn.dataset.modal === 'knowledge-source-modal') {
+        openKnowledgeSources(btn);
+        return;
+      }
+      if (btn.dataset.modal === 'publish-agent-modal' && document.getElementById('draft-status')?.textContent !== '已保存') {
+        showToast('请先保存草稿，再提交审核');
+        return;
+      }
+      if (btn.dataset.resource) {
+        const resourceType = btn.dataset.resource;
+        document.getElementById('resource-title').textContent = resourceType === 'knowledge' ? '选择知识库' : resourceType === 'system' ? '选择系统工具' : '选择工作流工具';
+        document.getElementById('resource-choices').innerHTML = resourceType === 'knowledge'
+          ? `<label class="choice"><input type="checkbox" checked><span class="resource-symbol">知</span><span><strong>合同制度知识库</strong><small class="subtle" style="display:block">文档 126 篇</small></span><span class="tag success">可用</span></label><label class="choice"><input type="checkbox" checked><span class="resource-symbol">知</span><span><strong>法务案例库</strong><small class="subtle" style="display:block">文档 58 篇</small></span><span class="tag success">可用</span></label><label class="choice"><input type="checkbox"><span class="resource-symbol">知</span><span><strong>采购制度库</strong><small class="subtle" style="display:block">文档 84 篇</small></span><span class="tag success">可用</span></label>`
+          : resourceType === 'system'
+          ? `<label class="choice"><input type="checkbox" checked><span class="resource-symbol">系</span><span><strong>获取当前时间</strong><small class="subtle" style="display:block">返回当前日期、时间及时区</small></span><span class="tag success">已启用</span></label><label class="choice"><input type="checkbox" checked><span class="resource-symbol">系</span><span><strong>Base64 解析</strong><small class="subtle" style="display:block">解析合法的 Base64 文本内容</small></span><span class="tag success">已启用</span></label><label class="choice"><input type="checkbox" checked><span class="resource-symbol">系</span><span><strong>保存为 Word 文档</strong><small class="subtle" style="display:block">生成 Word 文件并上传到文件存储</small></span><span class="tag success">已启用</span></label>`
+          : `<label class="choice"><input type="checkbox" checked><span class="resource-symbol">工</span><span><strong>合同风险审查</strong><small class="subtle" style="display:block">根据合同文本输出风险条款、等级与建议</small></span><span class="tag success">已发布</span></label><label class="choice"><input type="checkbox"><span class="resource-symbol">工</span><span><strong>企业信息核验</strong><small class="subtle" style="display:block">查询并核验企业工商信息</small></span><span class="tag success">已发布</span></label><label class="choice" style="opacity:.6"><input type="checkbox" disabled><span class="resource-symbol">工</span><span><strong>工商信息查询</strong><small class="subtle" style="display:block">工具已停用，不可新增挂载</small></span><span class="tag danger">不可用</span></label>`;
+      }
+      modal.classList.add('open');
+    }));
+    document.querySelectorAll('[data-close-modal]').forEach(btn => btn.addEventListener('click', () => btn.closest('.modal-mask').classList.remove('open')));
+    document.querySelectorAll('[data-submit]').forEach(btn => btn.addEventListener('click', () => { btn.closest('.modal-mask').classList.remove('open'); showToast(btn.dataset.submit); }));
+
+    const createAgentSubmit = document.getElementById('create-agent-submit');
+    createAgentSubmit.addEventListener('click', () => {
+      const nameInput = document.getElementById('create-agent-name');
+      const descInput = document.getElementById('create-agent-desc');
+      const name = nameInput.value.trim();
+      const description = descInput.value.trim();
+      document.getElementById('create-agent-name-error').style.display = name ? 'none' : 'block';
+      if (!name) return;
+      createAgentSubmit.disabled = true;
+      createAgentSubmit.textContent = '创建中...';
+      window.setTimeout(() => {
+        const initial = name.slice(0, 1) || '智';
+        document.getElementById('create-agent-modal').classList.remove('open');
+        document.getElementById('builder-name').textContent = name;
+        document.getElementById('builder-desc').textContent = description || '暂未填写描述';
+        document.getElementById('builder-avatar').textContent = initial;
+        document.getElementById('basic-avatar').textContent = initial;
+        document.getElementById('basic-info-name').value = name;
+        document.getElementById('basic-info-desc').value = description;
+        document.getElementById('publish-status').className = 'tag gray status';
+        document.getElementById('publish-status').textContent = '未发布';
+        document.getElementById('draft-status').className = 'tag gray';
+        document.getElementById('draft-status').textContent = '待配置';
+        document.getElementById('publish-agent-button').textContent = '提交发布审核';
+        document.getElementById('agent-model').value = '';
+        const debugMessages = document.getElementById('debug-messages');
+        debugMessages.innerHTML = '<div class="bubble"><strong></strong><p style="margin:6px 0 0">请先完成模型等配置，然后在这里调试问答效果。</p></div>';
+        debugMessages.querySelector('strong').textContent = name;
+        createAgentSubmit.disabled = false;
+        createAgentSubmit.textContent = '创建';
+        nameInput.value = '';
+        descInput.value = '';
+        switchScreen('agent-builder');
+        showToast('智能体已创建，请继续完成配置');
+      }, 350);
+    });
+
+    document.getElementById('basic-info-submit').addEventListener('click', () => {
+      const nameInput = document.getElementById('basic-info-name');
+      const descInput = document.getElementById('basic-info-desc');
+      const name = nameInput.value.trim();
+      const description = descInput.value.trim();
+      document.getElementById('basic-info-name-error').style.display = name ? 'none' : 'block';
+      if (!name) return;
+      document.getElementById('builder-name').textContent = name;
+      document.getElementById('builder-desc').textContent = description || '暂未填写描述';
+      document.getElementById('builder-avatar').textContent = name.slice(0, 1) || '智';
+      document.getElementById('basic-avatar').textContent = name.slice(0, 1) || '智';
+      document.getElementById('basic-info-modal').classList.remove('open');
+      showToast('基本信息已保存并立即生效');
+    });
+
+    let pendingConfirmText = '';
+    let pendingConfirmResult = '';
+    document.querySelectorAll('[data-confirm]').forEach(btn => btn.addEventListener('click', () => {
+      pendingConfirmText = btn.dataset.confirm;
+      pendingConfirmResult = btn.dataset.confirmResult || '';
+      const title = btn.dataset.confirmTitle || '操作确认';
+      const confirmButton = document.getElementById('confirm-ok');
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-text').textContent = pendingConfirmText;
+      confirmButton.className = title.includes('删除') || title.includes('停用') ? 'btn danger' : 'btn primary';
+      document.getElementById('confirm-modal').classList.add('open');
+    }));
+    document.getElementById('confirm-ok').addEventListener('click', () => { document.getElementById('confirm-modal').classList.remove('open'); showToast(pendingConfirmResult || (pendingConfirmText.includes('通过') ? '审核已通过' : '操作已完成')); });
+    document.getElementById('reject-submit').addEventListener('click', () => { const value = document.getElementById('reject-reason').value.trim(); document.getElementById('reject-error').style.display = value ? 'none' : 'block'; if (!value) return; document.getElementById('reject-modal').classList.remove('open'); showToast('审核已驳回'); });
+
+    const draftStatus = document.getElementById('draft-status');
+    const builderFields = document.querySelectorAll('#agent-builder .builder-form input, #agent-builder .builder-form select, #agent-builder .builder-form textarea');
+    builderFields.forEach(field => field.addEventListener('input', () => {
+      draftStatus.className = 'tag warning';
+      draftStatus.textContent = '有未保存修改';
+    }));
+    builderFields.forEach(field => field.addEventListener('change', () => {
+      draftStatus.className = 'tag warning';
+      draftStatus.textContent = '有未保存修改';
+    }));
+    document.getElementById('save-draft').addEventListener('click', event => {
+      if (!document.getElementById('agent-model').value) {
+        showToast('请先选择 AI 模型');
+        return;
+      }
+      const button = event.currentTarget;
+      button.disabled = true;
+      draftStatus.className = 'tag';
+      draftStatus.textContent = '保存中';
+      window.setTimeout(() => {
+        button.disabled = false;
+        draftStatus.className = 'tag success';
+        draftStatus.textContent = '已保存';
+        showToast('草稿已保存');
+      }, 350);
+    });
+
+    document.getElementById('debug-send').addEventListener('click', () => {
+      if (!document.getElementById('agent-model').value) {
+        showToast('请先选择 AI 模型再调试');
+        return;
+      }
+      const box = document.getElementById('debug-messages');
+      const q = document.getElementById('debug-question').value || '请审查这份合同';
+      box.insertAdjacentHTML('beforeend', `<div class="bubble user">${q}</div><div class="bubble"><div class="tool-state">✓ 已检索“合同制度知识库” · 5 条相关内容</div><div class="tool-state">✓ 已执行“合同风险审查”</div>发现 3 项需要关注的风险，其中付款条件为高风险。建议补充验收标准和逾期付款责任。</div>`);
+      box.scrollTop = box.scrollHeight;
+    });
+    document.getElementById('clear-debug').addEventListener('click', () => {
+      const box = document.getElementById('debug-messages');
+      box.innerHTML = '<div class="bubble"><strong></strong><p style="margin:6px 0 0">对话已清空，可以继续调试当前草稿配置。</p></div>';
+      box.querySelector('strong').textContent = document.getElementById('builder-name').textContent;
+    });
+
+    document.getElementById('upload-avatar').addEventListener('click', () => showToast('头像上传成功'));
+    function startChat() { document.getElementById('home-entry').style.display = 'none'; document.getElementById('agent-picker').style.display = 'none'; document.getElementById('home-chat').classList.add('active'); }
+    document.querySelectorAll('.start-chat').forEach(btn => btn.addEventListener('click', startChat));
+    document.getElementById('view-agent-list').addEventListener('click', () => { document.getElementById('home-entry').style.display = 'none'; document.getElementById('agent-picker').style.display = 'block'; });
+    document.getElementById('back-mode').addEventListener('click', () => { document.getElementById('agent-picker').style.display = 'none'; document.getElementById('home-entry').style.display = 'block'; });
+    document.getElementById('back-home').addEventListener('click', () => { document.getElementById('home-chat').classList.remove('active'); document.getElementById('agent-picker').style.display = 'block'; });
+    document.querySelectorAll('.preset').forEach(btn => btn.addEventListener('click', () => { document.getElementById('chat-question').value = btn.textContent; sendChat(); }));
+    function sendChat() {
+      const input = document.getElementById('chat-question'); const q = input.value.trim(); if (!q) return;
+      const scroll = document.getElementById('chat-scroll');
+      scroll.insertAdjacentHTML('beforeend', `<div class="bubble user">${q}</div><div class="bubble"><div class="tool-state">✓ 已检索企业合同制度 · 引用 4 篇文档</div><div class="tool-state">✓ “合同风险审查”执行成功</div><strong>审查结论</strong><p style="margin:6px 0">发现付款、验收和违约责任共 3 项风险。付款条款风险最高，建议明确付款前置条件和逾期责任。</p><button class="btn link">查看 4 条知识引用</button></div>`);
+      document.getElementById('task-list').innerHTML = `<div class="task-item"><span class="task-dot">✓</span><div><strong>理解问题</strong><div class="subtle small">已确认合同审查目标</div></div></div><div class="task-item"><span class="task-dot">✓</span><div><strong>检索企业知识</strong><div class="subtle small">命中 4 篇制度文档</div></div></div><div class="task-item"><span class="task-dot">✓</span><div><strong>执行合同风险审查</strong><div class="subtle small">工具执行成功</div></div></div><div class="task-item"><span class="task-dot">✓</span><div><strong>生成回答</strong><div class="subtle small">已完成</div></div></div>`;
+      input.value = ''; scroll.scrollTop = scroll.scrollHeight;
+    }
+    document.getElementById('chat-send').addEventListener('click', sendChat);
+
+    // 独立本地样例：沿用图谱原型的业务名称，不读取真实接口或持久化用户配置。
+    const knowledgeSourceCatalog = {
+      bases: [
+        { id:'kb-contract', name:'合同制度知识库', description:'合同管理制度、审批流程与审查规范', meta:'文档 126 篇' },
+        { id:'kb-legal', name:'法务案例库', description:'企业合同纠纷与法务处理案例', meta:'文档 58 篇' },
+        { id:'kb-purchase', name:'采购制度库', description:'采购管理办法、供应商准入与付款要求', meta:'文档 84 篇' },
+        { id:'kb-party', name:'国企党校学习知识资料库', description:'知识体系、分层学习重点与考核评价资料', meta:'文档 3 篇' },
+        { id:'kb-prevention', name:'禁毒宣传教育资料库', description:'禁毒教育活动、风险防范与求助指引', meta:'文档 9 篇' },
+        { id:'kb-product', name:'产品资料库与手册', description:'产品说明、功能清单与操作指引', meta:'文档 12 篇' },
+      ],
+      graphs: [
+        { id:'graph-party', name:'国企党校培训', description:'梳理知识体系、重点知识、学习人群与考核方式，支持按人群查找学习内容。', meta:'5 个实体类型 · 6 个关系类型', status:'published', enabled:true, version:1 },
+        { id:'graph-prevention', name:'禁毒知识图谱', description:'关联教育活动、风险识别、防范措施和求助渠道。', meta:'4 个实体类型 · 4 个关系类型', status:'published', enabled:true, version:1 },
+        { id:'graph-medical', name:'生物医药', description:'梳理药品、人群与疾病之间的关系，支持分类与层级查询。', meta:'6 个实体类型 · 2 个关系类型', status:'published', enabled:true, version:1 },
+        { id:'graph-organization', name:'企业组织', description:'连接企业、部门与人员，呈现组织架构和人员任职关系。', meta:'3 个实体类型 · 2 个关系类型', status:'draft', enabled:false, reason:'草稿 · 正式发布并启用后可选' },
+        { id:'graph-policy', name:'政策服务', description:'关联政策、企业与申报条件，支持政策检索与条件分析。', meta:'3 个实体类型 · 2 个关系类型', status:'reviewing', enabled:false, reason:'审核中 · 正式发布并启用后可选' },
+        { id:'graph-product', name:'产品知识', description:'整理产品、功能与使用场景，为产品咨询提供支持。', meta:'3 个实体类型 · 2 个关系类型', status:'published', enabled:false, version:1, reason:'已停用 · 重新启用后可选' },
+      ],
+    };
+    const knowledgeSourceLabels = { bases:'知识库', graphs:'知识图谱' };
+    const knowledgeSourceModal = document.getElementById('knowledge-source-modal');
+    // 弹窗草稿与已确认配置分离，切换页签及搜索不会丢失暂存多选。
+    let selectedKnowledgeSources = { bases:['kb-contract', 'kb-legal'], graphs:[] };
+    let pendingKnowledgeSources = null;
+    let knowledgeSourceTab = 'bases';
+    let knowledgeSourceQueries = { bases:'', graphs:'' };
+    let knowledgeSourceTrigger = null;
+
+    function escapeKnowledgeText(value) {
+      return String(value).replace(/[&<>"']/g, character => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[character]));
+    }
+
+    // 图谱挂载必须同时满足正式发布与启用，名称匹配不会绕过此边界。
+    function knowledgeSourceAvailable(item, type) {
+      return type === 'bases' || (item.status === 'published' && item.enabled);
+    }
+
+    function openKnowledgeSources(trigger) {
+      pendingKnowledgeSources = { bases:[...selectedKnowledgeSources.bases], graphs:[...selectedKnowledgeSources.graphs] };
+      knowledgeSourceQueries = { bases:'', graphs:'' };
+      knowledgeSourceTab = 'bases';
+      knowledgeSourceTrigger = trigger;
+      renderKnowledgeSourcePicker();
+      knowledgeSourceModal.classList.add('open');
+      document.getElementById('knowledge-source-search').focus();
+    }
+
+    function closeKnowledgeSources() {
+      pendingKnowledgeSources = null;
+      knowledgeSourceModal.classList.remove('open');
+      knowledgeSourceTrigger?.focus();
+    }
+
+    function knowledgeSourceCard(item) {
+      const available = knowledgeSourceAvailable(item, knowledgeSourceTab);
+      const selected = pendingKnowledgeSources[knowledgeSourceTab].includes(item.id);
+      const state = knowledgeSourceTab === 'graphs' ? `<span class="knowledge-source-state">${available ? '已正式发布 · 已启用 · v' + item.version : escapeKnowledgeText(item.reason)}</span>` : '';
+      return `<label class="knowledge-source-card ${selected ? 'is-selected' : ''} ${available ? '' : 'is-disabled'}">
+        <span class="resource-symbol" aria-hidden="true">${knowledgeSourceTab === 'graphs' ? '图' : '知'}</span>
+        <span class="knowledge-source-content"><span class="knowledge-source-name"><strong title="${escapeKnowledgeText(item.name)}">${escapeKnowledgeText(item.name)}</strong><input type="checkbox" data-knowledge-source="${item.id}" aria-label="${escapeKnowledgeText(item.name)}" ${selected ? 'checked' : ''} ${available ? '' : 'disabled'} /></span>
+        <span class="knowledge-source-description" title="${escapeKnowledgeText(item.description)}">${escapeKnowledgeText(item.description)}</span><span class="knowledge-source-meta">${escapeKnowledgeText(item.meta)}</span>${state}</span>
+      </label>`;
+    }
+
+    function renderKnowledgeSourceCount() {
+      document.getElementById('knowledge-source-selection').textContent = `已选 ${pendingKnowledgeSources.bases.length} 个知识库 · ${pendingKnowledgeSources.graphs.length} 个知识图谱`;
+    }
+
+    function renderKnowledgeSourcePicker() {
+      const label = knowledgeSourceLabels[knowledgeSourceTab];
+      const query = knowledgeSourceQueries[knowledgeSourceTab].trim().toLocaleLowerCase();
+      const search = document.getElementById('knowledge-source-search');
+      search.value = knowledgeSourceQueries[knowledgeSourceTab];
+      search.placeholder = '搜索' + label + '名称';
+      search.setAttribute('aria-label', search.placeholder);
+      document.querySelectorAll('[data-knowledge-tab]').forEach(button => {
+        const active = button.dataset.knowledgeTab === knowledgeSourceTab;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-selected', String(active));
+        button.tabIndex = active ? 0 : -1;
+      });
+      document.getElementById('knowledge-source-list').setAttribute('aria-labelledby', knowledgeSourceTab === 'bases' ? 'knowledge-base-tab' : 'knowledge-graph-tab');
+      document.getElementById('knowledge-source-hint').textContent = knowledgeSourceTab === 'graphs' ? '仅可选择已正式发布且启用的知识图谱，可与知识库一起使用。' : '可同时选择知识库和知识图谱，确认后加入智能体。';
+      const items = knowledgeSourceCatalog[knowledgeSourceTab].filter(item => item.name.toLocaleLowerCase().includes(query));
+      document.getElementById('knowledge-source-grid').innerHTML = items.length ? items.map(knowledgeSourceCard).join('') : `<div class="knowledge-source-empty"><span>未找到匹配的${label}</span><button class="btn link" data-clear-knowledge-search>清空搜索</button></div>`;
+      renderKnowledgeSourceCount();
+    }
+
+    function renderSelectedKnowledgeGroup(type) {
+      const items = knowledgeSourceCatalog[type].filter(item => selectedKnowledgeSources[type].includes(item.id));
+      const graph = type === 'graphs';
+      document.getElementById(graph ? 'knowledge-graph-count' : 'knowledge-base-count').textContent = knowledgeSourceLabels[type] + '（' + items.length + '）';
+      document.getElementById(graph ? 'selected-knowledge-graphs' : 'selected-knowledge-bases').innerHTML = items.length ? items.map(item => `<div class="resource-row" data-selected-knowledge="${item.id}"><span class="resource-symbol">${graph ? '图' : '知'}</span><div><strong>${escapeKnowledgeText(item.name)}</strong><div class="subtle small">${graph ? '知识图谱 · 已正式发布 · 已启用 · v' + item.version : item.meta}</div></div><button class="btn link danger" data-remove-knowledge="${item.id}" data-knowledge-type="${type}" aria-label="移除${escapeKnowledgeText(item.name)}">移除</button></div>`).join('') : `<div class="subtle small">尚未选择${knowledgeSourceLabels[type]}</div>`;
+    }
+
+    function markKnowledgeDraftChanged() {
+      draftStatus.className = 'tag warning';
+      draftStatus.textContent = '有未保存修改';
+    }
+
+    function confirmKnowledgeSources() {
+      if (!pendingKnowledgeSources) return;
+      // 确认时再次过滤可用性；仅在配置确有变化时标记智能体草稿待保存。
+      const next = {};
+      Object.keys(knowledgeSourceLabels).forEach(type => {
+        next[type] = knowledgeSourceCatalog[type].filter(item => pendingKnowledgeSources[type].includes(item.id) && knowledgeSourceAvailable(item, type)).map(item => item.id);
+      });
+      const changed = Object.keys(next).some(type => next[type].length !== selectedKnowledgeSources[type].length || next[type].some(id => !selectedKnowledgeSources[type].includes(id)));
+      selectedKnowledgeSources = next;
+      Object.keys(knowledgeSourceLabels).forEach(renderSelectedKnowledgeGroup);
+      closeKnowledgeSources();
+      if (changed) markKnowledgeDraftChanged();
+      showToast(changed ? '已更新知识库与知识图谱，请保存草稿' : '已保留当前选择');
+    }
+
+    document.querySelectorAll('[data-knowledge-tab]').forEach(button => button.addEventListener('click', () => {
+      knowledgeSourceTab = button.dataset.knowledgeTab;
+      renderKnowledgeSourcePicker();
+      document.getElementById('knowledge-source-list').scrollTop = 0;
+    }));
+    document.getElementById('knowledge-source-search').addEventListener('input', event => {
+      knowledgeSourceQueries[knowledgeSourceTab] = event.target.value;
+      renderKnowledgeSourcePicker();
+      document.getElementById('knowledge-source-list').scrollTop = 0;
+    });
+    document.getElementById('knowledge-source-search-form').addEventListener('submit', event => {
+      event.preventDefault();
+      renderKnowledgeSourcePicker();
+    });
+    document.getElementById('knowledge-source-grid').addEventListener('change', event => {
+      const input = event.target.closest('[data-knowledge-source]');
+      if (!input || !pendingKnowledgeSources) return;
+      const item = knowledgeSourceCatalog[knowledgeSourceTab].find(row => row.id === input.dataset.knowledgeSource);
+      if (!item || !knowledgeSourceAvailable(item, knowledgeSourceTab)) return;
+      pendingKnowledgeSources[knowledgeSourceTab] = pendingKnowledgeSources[knowledgeSourceTab].filter(id => id !== item.id);
+      if (input.checked) pendingKnowledgeSources[knowledgeSourceTab].push(item.id);
+      input.closest('.knowledge-source-card').classList.toggle('is-selected', input.checked);
+      renderKnowledgeSourceCount();
+    });
+    document.getElementById('knowledge-source-grid').addEventListener('click', event => {
+      if (!event.target.closest('[data-clear-knowledge-search]')) return;
+      knowledgeSourceQueries[knowledgeSourceTab] = '';
+      renderKnowledgeSourcePicker();
+      document.getElementById('knowledge-source-search').focus();
+    });
+    document.getElementById('builder-knowledge-section').addEventListener('click', event => {
+      const button = event.target.closest('[data-remove-knowledge]');
+      if (!button) return;
+      const type = button.dataset.knowledgeType;
+      selectedKnowledgeSources[type] = selectedKnowledgeSources[type].filter(id => id !== button.dataset.removeKnowledge);
+      renderSelectedKnowledgeGroup(type);
+      markKnowledgeDraftChanged();
+      document.querySelector('[data-modal="knowledge-source-modal"]').focus({ preventScroll:true });
+      showToast('已移除，请保存草稿');
+    });
+    document.querySelectorAll('[data-close-knowledge-source]').forEach(button => button.addEventListener('click', closeKnowledgeSources));
+    document.getElementById('confirm-knowledge-source').addEventListener('click', confirmKnowledgeSources);
+    knowledgeSourceModal.addEventListener('click', event => {
+      if (event.target === knowledgeSourceModal) closeKnowledgeSources();
+    });
+    knowledgeSourceModal.addEventListener('keydown', event => {
+      if (event.key === 'Escape') { event.preventDefault(); closeKnowledgeSources(); return; }
+      const tab = event.target.closest('[data-knowledge-tab]');
+      if (tab && ['ArrowLeft', 'ArrowRight'].includes(event.key)) {
+        event.preventDefault();
+        const nextTab = document.querySelector(`[data-knowledge-tab="${knowledgeSourceTab === 'bases' ? 'graphs' : 'bases'}"]`);
+        nextTab.click();
+        nextTab.focus();
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(knowledgeSourceModal.querySelectorAll('button:not(:disabled), input:not(:disabled)')).filter(element => element.tabIndex >= 0);
+      const edge = event.shiftKey ? focusable[0] : focusable[focusable.length - 1];
+      if (event.target !== edge) return;
+      event.preventDefault();
+      (event.shiftKey ? focusable[focusable.length - 1] : focusable[0]).focus();
+    });
+    Object.keys(knowledgeSourceLabels).forEach(renderSelectedKnowledgeGroup);
+    // 便于评审直接进入本次更新的编辑场景，不改变其他场景入口。
+    if (window.location.hash === '#agent-builder') switchScreen('agent-builder');
+  </script>
+</body>
+</html>

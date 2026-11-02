@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>知识图谱原型</title>
+</head>
+<body>
+  <p><a href="knowledge-graph/index.html">进入知识图谱原型</a></p>
+  <script>
+    // Keep shared deep links usable from the public repository root.
+    const destination = new URL('knowledge-graph/index.html', location.href);
+    destination.search = location.search;
+    destination.hash = location.hash;
+    location.replace(destination.href);
+  </script>
+</body>
+</html>

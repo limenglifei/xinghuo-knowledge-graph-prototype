@@ -1,0 +1,25 @@
+/* 发布确认与审核记录沿用质检页反馈、抽屉和按钮样式。 */
+.q-readiness { display:flex; align-items:center; justify-content:space-between; gap:16px; margin:0 0 24px; padding:14px 16px; border:1px solid #d9e8df; border-radius:7px; background:#f5fbf7; }
+.q-readiness strong { color:#26714e; font-weight:600; font-size:14px; }
+.q-readiness p { margin:6px 0; color:#60756b; font-size:12px; line-height:1.8; }
+.q-readiness small { color:#60756b; font-size:12px; }
+.q-readiness.warning { border-color:#f1dbac; background:#fff9ec; }
+.q-readiness.warning strong,.q-readiness.warning p,.q-readiness.warning small { color:#967026; }
+.q-readiness.neutral { border-color:#dce6fa; background:#f5f8ff; }
+.q-readiness.neutral strong,.q-readiness.neutral p,.q-readiness.neutral small { color:#566682; }
+.q-explorer-section { margin-top:24px; scroll-margin-top:20px; }
+.q-explorer-section > h2 { font-size:15px; font-weight:600; margin:0; }
+.q-explorer-section > .help { margin:7px 0 16px; line-height:1.8; }
+.q-publish-checklist { display:flex; flex-direction:column; gap:14px; margin:22px 0; }
+.q-publish-checklist label { display:flex; align-items:flex-start; gap:10px; font-size:13px; line-height:1.7; }
+.q-publish-checklist input { flex-shrink:0; margin-top:4px; }
+.q-publish-note { font-size:13px; color:#967026; padding:10px 12px; background:#fff9ec; border-radius:6px; line-height:1.8; }
+#graphPublishSummary { line-height:1.8; }
+#graphPublishError { margin:16px 0 0; }
+.application-history-filter { display:flex; align-items:center; gap:14px; margin-bottom:18px; }
+.application-history-filter select { width:180px; }
+#applicationHistoryRecords .application-history-actions { display:flex; justify-content:flex-end; margin-top:14px; }
+@media (max-width:1300px) {
+  .q-scores { grid-template-columns:160px minmax(0,1fr); }
+  .q-readiness { align-items:flex-start; }
+}
